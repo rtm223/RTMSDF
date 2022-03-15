@@ -63,7 +63,7 @@ enum class ERTMSDFErrorCorrectionMode : uint8
 	IndiscriminateFull UMETA(DisplayName="Indiscriminate - Full"),
 };
 
-USTRUCT(BlueprintType, meta=(DisplayName="SVG to SDF Import Settings [RTMSDF]"))
+USTRUCT(meta=(DisplayName="SVG to SDF Import Settings [RTMSDF]"))
 struct FRTMSDF_SVGImportSettings : public FRTMSDF_CommonImportSettings
 {
 	GENERATED_BODY()

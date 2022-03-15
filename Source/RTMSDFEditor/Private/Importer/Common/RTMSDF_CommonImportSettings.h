@@ -15,28 +15,28 @@ enum class ERTMSDFDistanceMode : uint8
 	Pixels,
 };
 
-USTRUCT(BlueprintType, meta=(DisplayName="Common SDF Import Settings [RTMSDF]"))
+USTRUCT(meta=(DisplayName="Common SDF Import Settings [RTMSDF]"))
 struct FRTMSDF_CommonImportSettings
 {
 	GENERATED_BODY()
 
 	/* How the distance field size is determined */
-	UPROPERTY(EditAnywhere, Category="Import", BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, Category="Import")
 	ERTMSDFDistanceMode DistanceMode = ERTMSDFDistanceMode::Normalized;
 
 	/* Distance field size normalized against shortest edge of texture */
-	UPROPERTY(EditAnywhere, Category="Import", BlueprintReadWrite, meta=(EditCondition="DistanceMode == ERTMSDFDistanceMode::Normalized", EditConditionHides, UIMin=0, ClampMin=0, UIMax=0.5, ClampMax=0.5))
+	UPROPERTY(EditAnywhere, Category="Import", meta=(EditCondition="DistanceMode == ERTMSDFDistanceMode::Normalized", EditConditionHides, UIMin=0, ClampMin=0, UIMax=0.5, ClampMax=0.5))
 	float NormalizedDistance = 0.25f;
 
 	/* Distance field size as an absolute size in the source file */
-	UPROPERTY(EditAnywhere, Category="Import", BlueprintReadWrite, meta=(EditCondition="DistanceMode == ERTMSDFDistanceMode::Absolute", EditConditionHides, UIMin=1, ClampMin=1))
+	UPROPERTY(EditAnywhere, Category="Import", meta=(EditCondition="DistanceMode == ERTMSDFDistanceMode::Absolute", EditConditionHides, UIMin=1, ClampMin=1))
 	float AbsoluteDistance = 128.0f;
 
 	/* Distance field size as pixels in the output SDF texture */
-	UPROPERTY(EditAnywhere, Category="Import", BlueprintReadWrite, meta=(EditCondition="DistanceMode == ERTMSDFDistanceMode::Pixels", EditConditionHides, UIMin=1, ClampMin=1))
+	UPROPERTY(EditAnywhere, Category="Import", meta=(EditCondition="DistanceMode == ERTMSDFDistanceMode::Pixels", EditConditionHides, UIMin=1, ClampMin=1))
 	float PixelDistance = 4.0f;
 
 	/* Invert distance? (pixels inside the shape will be +ve, outside -ve) */
-	UPROPERTY(EditAnywhere, Category="Import", BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, Category="Import")
 	bool InvertDistance = true;
 };

@@ -27,7 +27,7 @@ enum class ERTMSDF_Channels : uint8
 	All = Red | Green | Blue | Alpha,
 };
 
-USTRUCT(BlueprintType, meta=(DisplayName="Bitmap to SDF Import Settings [RTMSDF]"))
+USTRUCT(meta=(DisplayName="Bitmap to SDF Import Settings [RTMSDF]"))
 struct FRTMSDF_BitmapImportSettings : public FRTMSDF_CommonImportSettings
 {
 	GENERATED_BODY()

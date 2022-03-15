@@ -4,6 +4,7 @@
 #include "ISettingsModule.h"
 #include "ISettingsSection.h"
 #include "Config/RTMSDFConfig.h"
+#include "DetailsCustomization/RTMSDF_SettingsStructCustomization.h"
 #include "ThumbnailRendering/ThumbnailManager.h"
 #include "Thumbnails/RTMSDF_ThumbnailRenderer.h"
 
@@ -11,6 +12,22 @@
 DEFINE_LOG_CATEGORY(RTMSDFEditor);
 
 IMPLEMENT_MODULE(FRTMSDFEditorModule, RTMSDFEditor)
+
+namespace RTMSDF
+{
+	// Copied across from RTMCommonEditor, RTMDetailsCustomizationHelpers
+
+	template<typename TCustomization>
+	void RegisterDetailsCustomization(const FName& propertyTypeName)
+	{
+		auto propertyTypeLayoutDelegate = FOnGetPropertyTypeCustomizationInstance::CreateStatic([]() { return TSharedRef<IPropertyTypeCustomization>(MakeShareable(new TCustomization)); });
+
+		FPropertyEditorModule& propertyModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+		propertyModule.RegisterCustomPropertyTypeLayout(propertyTypeName, propertyTypeLayoutDelegate);
+	}
+
+	template<typename TCustomization, typename TStruct> void RegisterStructDetailsCustomization() { RegisterDetailsCustomization<TCustomization>(TStruct::StaticStruct()->GetFName()); }
+}
 
 void FRTMSDFEditorModule::StartupModule()
 {
@@ -26,10 +43,8 @@ void FRTMSDFEditorModule::StartupModule()
 	tnManager.UnregisterCustomRenderer(UTexture2D::StaticClass());
 	tnManager.RegisterCustomRenderer(UTexture2D::StaticClass(), URTMSDF_ThumbnailRenderer::StaticClass());
 
-	// TODO - reimplement in module to make slightly nicer
-	// Commented out to remove dependency on RTMCommon
-	//RegisterStructDetailsCustomization<FRTMInlineStructCustomization, FRTMSDF_SVGImportSettings>();
-	//RegisterStructDetailsCustomization<FRTMInlineStructCustomization, FRTMSDF_BitmapImportSettings>();
+	RTMSDF::RegisterStructDetailsCustomization<FRTMSDF_SettingsStructCustomization, FRTMSDF_SVGImportSettings>();
+	RTMSDF::RegisterStructDetailsCustomization<FRTMSDF_SettingsStructCustomization, FRTMSDF_BitmapImportSettings>();
 }
 
 #undef LOCTEXT_NAMESPACE

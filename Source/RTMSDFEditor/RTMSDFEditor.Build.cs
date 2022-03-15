@@ -23,6 +23,7 @@ public class RTMSDFEditor : ModuleRules
 				"UnrealEd",
 				"RHI",
 				"ChlumskyMSDFGen",
+				"PropertyEditor",
 			});
 	}
 }

@@ -11,7 +11,7 @@ Uses [MSDFGen](https://github.com/Chlumsky/msdfgen) for processing of SVG files
 3. Check Project Settings -> Plugins -> RTM SDF for the important settings
   * SVG Filename Suffix - .svg source files with this suffix will be imported and converted to MSDF, i.e. T_MyFancyIcon_SDF.svg
   * Bitmap Filename Suffix - bitmap files (.png, .psd, .bmp etc.) with this suffix will be imported and converted to SDF files, i.e. T_MyLessFancyIcons_SDF.psd
-  * SVG Import settings are related to MSDFGen - see [MSDFGen](https://github.com/Chlumsky/msdfgen) for details and - can be overridden for individual files
+  * SVG Import settings are related to MSDFGen - see [MSDFGen](https://github.com/Chlumsky/msdfgen) for details - can be overridden for individual files
   * Bitmap Default Import Settings are for importing bitmaps and can be overridden for individual files
 4. Create an svg file with the approriate naming and import it to unreal
 

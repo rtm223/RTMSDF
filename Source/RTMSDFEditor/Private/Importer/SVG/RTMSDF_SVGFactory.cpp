@@ -83,6 +83,9 @@ UObject* URTMSDF_SVGFactory::FactoryCreateBinary(UClass* inClass, UObject* inPar
 	}
 
 	shape.normalize();
+	// TODO VAlidate shape: shape.validate()
+	// 	shape.validate();
+	
 
 	UTexture2D* texture = nullptr;
 	if(auto newObject = CreateOrOverwriteAsset(inClass, inParent, inName, flags))
@@ -104,8 +107,13 @@ UObject* URTMSDF_SVGFactory::FactoryCreateBinary(UClass* inClass, UObject* inPar
 	Vector2 msdfDims = svgDims * scale;
 	Projection projection(scale, 0.0f);
 
-	// TODO: SKIA : Scanline Pass goes here 
-
+#ifdef MSDFGEN_USE_SKIA
+	// TODO: SKIA : resolve shape goes here
+	static_assert(false, "Skia not implemented, but building with 'MSDFGEN_USE_SKIA")
+#else
+	shape.orientContours();
+#endif
+	
 	double range = importerSettings.AbsoluteDistance;
 	if(importerSettings.DistanceMode == ERTMSDFDistanceMode::Normalized)
 		range = importerSettings.NormalizedDistance * min(svgDims.x, svgDims.y);

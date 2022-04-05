@@ -34,5 +34,7 @@ public class ChlumskyMSDFGen : ModuleRules
 		if (UnrealTargetPlatform.Win64 == Target.Platform || UnrealTargetPlatform.Linux == Target.Platform ||
 		    UnrealTargetPlatform.Mac == Target.Platform)
 			PublicAdditionalLibraries.Add(Path.Combine(freetypeLibPath, "win64", "freetype.lib"));
+
+		bUseUnity = false;
 	}
 }

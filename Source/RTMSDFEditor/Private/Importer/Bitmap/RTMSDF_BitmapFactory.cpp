@@ -89,12 +89,12 @@ UObject* URTMSDF_BitmapFactory::FactoryCreateBinary(UClass* inClass, UObject* in
 	else if(importerSettings.DistanceMode == ERTMSDFDistanceMode::Pixels)
 		range = importerSettings.PixelDistance / scale;
 
-	float* sourceEdges = (float*)FMemory::Malloc((sourceWidth - 1) * (sourceHeight - 1) * 2 * sizeof(float));
+	float* sourceIntersections = (float*)FMemory::Malloc((sourceWidth - 1) * (sourceHeight - 1) * 2 * sizeof(float));
 	if(wantPreserveRGB)
 	{
-		if(FindEdges(sourceWidth, sourceHeight, mip, elementWidth, alphaChannel, sourceEdges))
+		if(FindIntersections(sourceWidth, sourceHeight, mip, elementWidth, alphaChannel, sourceIntersections))
 		{
-			CreateDistanceField(sourceWidth, sourceHeight, mip, elementWidth, alphaChannel, range, importerSettings.InvertDistance, sourceEdges, mip);
+			CreateDistanceField(sourceWidth, sourceHeight, mip, elementWidth, alphaChannel, range, importerSettings.InvertDistance, sourceIntersections, mip);
 		}
 		else
 		{
@@ -116,9 +116,9 @@ UObject* URTMSDF_BitmapFactory::FactoryCreateBinary(UClass* inClass, UObject* in
 				|| (i == greenChannel && importerSettings.UsesAnyChannel(ERTMSDF_Channels::Green))
 				|| (i == alphaChannel && importerSettings.UsesAnyChannel(ERTMSDF_Channels::Alpha));
 
-			// OK to reuse sourceEdges here as FindEdges will explicitly fill every entry
-			if(useChannel && FindEdges(sourceWidth, sourceHeight, mip, elementWidth, i, sourceEdges))
-				CreateDistanceField(sourceWidth, sourceHeight, sdfWidth, sdfHeight, mip, elementWidth, i, range, importerSettings.InvertDistance, sourceEdges, sdfPixels);
+			// OK to reuse sourceIntersections here as FindIntersections will explicitly fill the entire buffer
+			if(useChannel && FindIntersections(sourceWidth, sourceHeight, mip, elementWidth, i, sourceIntersections))
+				CreateDistanceField(sourceWidth, sourceHeight, sdfWidth, sdfHeight, mip, elementWidth, i, range, importerSettings.InvertDistance, sourceIntersections, sdfPixels);
 			else
 				ForceChannelValue(sdfWidth, sdfHeight, sdfPixels, elementWidth, i, i == alphaChannel ? 255 : 0);
 		}
@@ -128,8 +128,8 @@ UObject* URTMSDF_BitmapFactory::FactoryCreateBinary(UClass* inClass, UObject* in
 		FMemory::Free(sdfPixels);
 		sdfPixels = nullptr;
 	}
-	FMemory::Free(sourceEdges);
-	sourceEdges = nullptr;
+	FMemory::Free(sourceIntersections);
+	sourceIntersections = nullptr;
 
 	// TODO - PSD files always come in as RGBA even if they are Grayscale
 	if(!existingTexture)
@@ -238,15 +238,15 @@ EReimportResult::Type URTMSDF_BitmapFactory::Reimport(UObject* obj)
 	return EReimportResult::Type::Failed;
 }
 
-bool URTMSDF_BitmapFactory::FindEdges(int width, int height, uint8* const pixels, int pixelWidth, int channelOffset, float* outEdgeBuffer)
+bool URTMSDF_BitmapFactory::FindIntersections(int width, int height, uint8* const pixels, int pixelWidth, int channelOffset, float* outIntersectionBuffer)
 {
-	const int edgeMapWidth = width - 1;
-	const int edgeMapHeight = height - 1;
+	const int intersectionMapWidth = width - 1;
+	const int intersectionMapHeight = height - 1;
 
-	std::atomic_int64_t numEdges = false;
-	ParallelFor(edgeMapHeight, [&](const int eY)
+	std::atomic_int64_t numFound = false;
+	ParallelFor(intersectionMapHeight, [&](const int eY)
 	{
-		for(int eX = 0; eX < edgeMapWidth; eX++)
+		for(int eX = 0; eX < intersectionMapWidth; eX++)
 		{
 			const int mipIdx = eY * width + eX;
 			const uint8 currPix = pixels[mipIdx * pixelWidth + channelOffset];
@@ -257,30 +257,31 @@ bool URTMSDF_BitmapFactory::FindEdges(int width, int height, uint8* const pixels
 			const float denominatorX = static_cast<float>(xPix - currPix);
 			const float denominatorY = static_cast<float>(yPix - currPix);
 
-			const int edgeXIdx = (eY * edgeMapWidth + eX) * 2;
-			const int edgeYIdx = edgeXIdx + 1;
+			const int intersectionTopIdx = (eY * intersectionMapWidth + eX) * 2;
+			const int intersectionLeftIdx = intersectionTopIdx + 1;
 
-			outEdgeBuffer[edgeXIdx] = denominatorX != 0.0f ? numerator / denominatorX : -FLT_MAX;
-			outEdgeBuffer[edgeYIdx] = denominatorY != 0.0f ? numerator / denominatorY : -FLT_MAX;
+			const float intersectionTop = denominatorX != 0.0f ? numerator / denominatorX : -FLT_MAX;
+			const float intersectionLeft = denominatorY != 0.0f ? numerator / denominatorY : -FLT_MAX;
 
-			outEdgeBuffer[edgeXIdx] = outEdgeBuffer[edgeXIdx] > 1.0f ? -FLT_MAX : outEdgeBuffer[edgeXIdx];
-			outEdgeBuffer[edgeYIdx] = outEdgeBuffer[edgeYIdx] > 1.0f ? -FLT_MAX : outEdgeBuffer[edgeYIdx];
-			if(outEdgeBuffer[edgeXIdx] >= 0.0f || outEdgeBuffer[edgeYIdx] >= 0.0f)
-				++numEdges;
+			outIntersectionBuffer[intersectionTopIdx] = intersectionTop > 1.0f ? -FLT_MAX : intersectionTop;
+			outIntersectionBuffer[intersectionLeftIdx] = intersectionLeft > 1.0f ? -FLT_MAX : intersectionLeft;
+
+			if(outIntersectionBuffer[intersectionTopIdx] >= 0.0f || outIntersectionBuffer[intersectionLeftIdx] >= 0.0f)
+				++numFound;
 		}
 	});
-	return numEdges > 1;
+	return numFound > 1;
 }
 
-void URTMSDF_BitmapFactory::CreateDistanceField(int width, int height, uint8* const pixels, int pixelWidth, int channelOffset, float fieldDistance, bool invertDistance, float* const edges, uint8* outPixelBuffer)
+void URTMSDF_BitmapFactory::CreateDistanceField(int width, int height, uint8* const pixels, int pixelWidth, int channelOffset, float fieldDistance, bool invertDistance, float* const intersections, uint8* outPixelBuffer)
 {
-	CreateDistanceField(width, height, width, height, pixels, pixelWidth, channelOffset, fieldDistance, invertDistance, edges, outPixelBuffer);
+	CreateDistanceField(width, height, width, height, pixels, pixelWidth, channelOffset, fieldDistance, invertDistance, intersections, outPixelBuffer);
 }
 
-void URTMSDF_BitmapFactory::CreateDistanceField(int sourceWidth, int sourceHeight, int sdfWidth, int sdfHeight, uint8* const pixels, int pixelWidth, int channelOffset, float fieldDistance, bool invertDistance, float* const edges, uint8* outPixelBuffer)
+void URTMSDF_BitmapFactory::CreateDistanceField(int sourceWidth, int sourceHeight, int sdfWidth, int sdfHeight, uint8* const pixels, int pixelWidth, int channelOffset, float fieldDistance, bool invertDistance, const float* intersectionMap, uint8* outPixelBuffer)
 {
-	const int edgeMapWidth = sourceWidth - 1;
-	const int edgeMapHeight = sourceHeight - 1;
+	const int intersectionMapWidth = sourceWidth - 1;
+	const int intersectionMapHeight = sourceHeight - 1;
 	const float halfFieldDistance = fieldDistance * 0.5f;
 
 	// static const auto edgeTest = [](const FVector2D& edgePos, const FVector2D& iPos, float& currDistSq)
@@ -312,23 +313,23 @@ void URTMSDF_BitmapFactory::CreateDistanceField(int sourceWidth, int sourceHeigh
 		float maxDist = halfFieldDistance;
 
 		int edgeMinY = FMath::Max(0.0f, sourcePos.Y - maxDist);
-		int edgeMaxY = FMath::Min(static_cast<float>(edgeMapHeight), sourcePos.Y + maxDist);
+		int edgeMaxY = FMath::Min(static_cast<float>(intersectionMapHeight), sourcePos.Y + maxDist);
 
 		for(int y = edgeMinY; y < edgeMaxY; y++)
 		{
 			const int edgeMinX = FMath::Max(0.0f, sourcePos.X - maxDist);
-			const int edgeMaxX = FMath::Min(static_cast<float>(edgeMapWidth), sourcePos.X + maxDist);
+			const int edgeMaxX = FMath::Min(static_cast<float>(intersectionMapWidth), sourcePos.X + maxDist);
 
 			for(int x = edgeMinX; x < edgeMaxX; x++)
 			{
-				const int currIdx = (y * edgeMapWidth + x) * 2;
-				const int nextColIdxUnsafe = (y * edgeMapWidth + (x + 1)) * 2;		// are these really unsafe? 
-				const int nextRowIdxUnsafe = ((y + 1) * edgeMapWidth + x) * 2;		// TODO - should be possible to make this whole thing safe
+				const int currIdx = (y * intersectionMapWidth + x) * 2;
+				const int nextColIdxUnsafe = (y * intersectionMapWidth + (x + 1)) * 2;		// are these really unsafe? 
+				const int nextRowIdxUnsafe = ((y + 1) * intersectionMapWidth + x) * 2;		// TODO - should be possible to make this whole thing safe
 
-				const float topIntersection = edges[currIdx];
-				const float leftIntersection = edges[currIdx + 1];
-				const float rightIntersection = (x < edgeMapWidth - 1) ? edges[nextColIdxUnsafe + 1] : -1.0f;
-				const float bottomIntersection = (y < edgeMapHeight - 1) ? edges[nextRowIdxUnsafe] : -1.0f;
+				const float topIntersection = intersectionMap[currIdx];
+				const float leftIntersection = intersectionMap[currIdx + 1];
+				const float rightIntersection = (x < intersectionMapWidth - 1) ? intersectionMap[nextColIdxUnsafe + 1] : -1.0f;
+				const float bottomIntersection = (y < intersectionMapHeight - 1) ? intersectionMap[nextRowIdxUnsafe] : -1.0f;
 
 				TArray<FVector2D, TInlineAllocator<4>> intersections;
 
@@ -351,7 +352,7 @@ void URTMSDF_BitmapFactory::CreateDistanceField(int sourceWidth, int sourceHeigh
 					edgeTest2(intersections[2], intersections[3], sourcePos, currDistSq);
 
 				// Error detection. We should always have exactly 2 or 4 points OR
-				// exactly 1 point that is on a corner (which we ignore)
+				// exactly 1 point that is on a corner (which is ignored ignore)
 				if(numPoints == 1)
 				{
 					const bool isNotCorner = (leftIntersection > 0.0f && leftIntersection < 1.0f)
@@ -359,14 +360,15 @@ void URTMSDF_BitmapFactory::CreateDistanceField(int sourceWidth, int sourceHeigh
 						|| (topIntersection > 0.0f && topIntersection < 1.0f)
 						|| (bottomIntersection > 0.0f && bottomIntersection < 1.0f);
 
-					ensureAlwaysMsgf(!isNotCorner, TEXT("At position [%d,%d] have %d edges, expected 0,2,4"), x, y, intersections.Num());
+					ensureAlwaysMsgf(!isNotCorner, TEXT("At position [%d,%d] have %d intersections, expected 0, 2, or 4"), x, y, intersections.Num());
 				}
-				ensureAlwaysMsgf(numPoints != 3, TEXT("At position [%d,%d] have %d edges, expected 0,2,4"), x, y, intersections.Num());
+				ensureAlwaysMsgf(numPoints != 3, TEXT("At position [%d,%d] have %d intersections, expected 0, 2, or 4"), x, y, intersections.Num());
 			}
 
+			// shrink the search radius after every horizontal scan and skip lines if possible
 			maxDist = FMath::Min(FMath::Sqrt(currDistSq), maxDist);
 			y = FMath::Max(y, static_cast<int>(sourcePos.Y - maxDist));
-			edgeMaxY = FMath::Min(static_cast<float>(edgeMapHeight), sourcePos.Y + maxDist);
+			edgeMaxY = FMath::Min(static_cast<float>(intersectionMapHeight), sourcePos.Y + maxDist);
 		}
 
 		float dist = FMath::Sqrt(currDistSq);

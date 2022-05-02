@@ -27,9 +27,9 @@ public:
 	virtual EReimportResult::Type Reimport(UObject* obj) override;
 
 private:
-	static bool FindEdges(int width, int height, uint8* const pixels, int pixelWidth, int channelOffset, float* outEdgeBuffer);
-	static void CreateDistanceField(int width, int height, uint8* const pixels, int pixelWidth, int channelOffset, float fieldDistance, bool invertDistance, float* const edges, uint8* outPixelBuffer);
-	static void CreateDistanceField(int sourceWidth, int sourceHeight, int sdfWidth, int sdfHeight, uint8* const pixels, int pixelWidth, int channelOffset, float fieldDistance, bool invertDistance, float* const edges, uint8* outPixelBuffer);
+	static bool FindIntersections(int width, int height, uint8* const pixels, int pixelWidth, int channelOffset, float* outIntersectionBuffer);
+	static void CreateDistanceField(int width, int height, uint8* const pixels, int pixelWidth, int channelOffset, float fieldDistance, bool invertDistance, float* const intersections, uint8* outPixelBuffer);
+	static void CreateDistanceField(int sourceWidth, int sourceHeight, int sdfWidth, int sdfHeight, uint8* const pixels, int pixelWidth, int channelOffset, float fieldDistance, bool invertDistance, const float* intersectionMap, uint8* outPixelBuffer);
 	static void ForceChannelValue(int width, int height, uint8* pixels, int pixelWidth, int channelOffset, uint8 value);
 	static FVector2D TransformPos(float fromWidth, float fromHeight, float toWidth, float toHeight, const FVector2D& fromVec);
 	static uint8 ComputePixelValue(FVector2D pos, int width, int height, uint8* const buffer, int pixelWidth, int channelOffset);

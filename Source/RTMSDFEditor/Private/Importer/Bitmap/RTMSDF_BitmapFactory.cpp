@@ -243,7 +243,7 @@ bool URTMSDF_BitmapFactory::FindEdges(int width, int height, uint8* const pixels
 	const int edgeMapWidth = width - 1;
 	const int edgeMapHeight = height - 1;
 
-	bool anyEdges = false;
+	std::atomic_int64_t numEdges = false;
 	ParallelFor(edgeMapHeight, [&](const int eY)
 	{
 		for(int eX = 0; eX < edgeMapWidth; eX++)
@@ -254,8 +254,8 @@ bool URTMSDF_BitmapFactory::FindEdges(int width, int height, uint8* const pixels
 			const uint8 yPix = pixels[(mipIdx + width) * pixelWidth + channelOffset];
 
 			const float numerator = (127 - currPix);
-			const float denominatorX = (float)(xPix - currPix);
-			const float denominatorY = (float)(yPix - currPix);
+			const float denominatorX = static_cast<float>(xPix - currPix);
+			const float denominatorY = static_cast<float>(yPix - currPix);
 
 			const int edgeXIdx = (eY * edgeMapWidth + eX) * 2;
 			const int edgeYIdx = edgeXIdx + 1;
@@ -265,10 +265,11 @@ bool URTMSDF_BitmapFactory::FindEdges(int width, int height, uint8* const pixels
 
 			outEdgeBuffer[edgeXIdx] = outEdgeBuffer[edgeXIdx] > 1.0f ? -FLT_MAX : outEdgeBuffer[edgeXIdx];
 			outEdgeBuffer[edgeYIdx] = outEdgeBuffer[edgeYIdx] > 1.0f ? -FLT_MAX : outEdgeBuffer[edgeYIdx];
-			anyEdges |= outEdgeBuffer[edgeXIdx] >= 0.0f || outEdgeBuffer[edgeYIdx] >= 0.0f;
+			if(outEdgeBuffer[edgeXIdx] >= 0.0f || outEdgeBuffer[edgeYIdx] >= 0.0f)
+				++numEdges;
 		}
 	});
-	return anyEdges;
+	return numEdges > 1;
 }
 
 void URTMSDF_BitmapFactory::CreateDistanceField(int width, int height, uint8* const pixels, int pixelWidth, int channelOffset, float fieldDistance, bool invertDistance, float* const edges, uint8* outPixelBuffer)

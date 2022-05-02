@@ -366,7 +366,7 @@ void URTMSDF_BitmapFactory::CreateDistanceField(int sourceWidth, int sourceHeigh
 			}
 
 			// shrink the search radius after every horizontal scan and skip lines if possible
-			maxDist = FMath::Min(FMath::Sqrt(currDistSq), maxDist);
+			maxDist = FMath::Min(FMath::Sqrt(currDistSq) + 1, maxDist);
 			y = FMath::Max(y, static_cast<int>(sourcePos.Y - maxDist));
 			edgeMaxY = FMath::Min(static_cast<float>(intersectionMapHeight), sourcePos.Y + maxDist);
 		}

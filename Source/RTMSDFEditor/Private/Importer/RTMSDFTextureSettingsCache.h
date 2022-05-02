@@ -26,7 +26,7 @@ struct FRTMSDFTextureSettingsCache
 	bool VirtualTextureStreaming;
 	FVector4 AlphaCoverageThresholds;
 
-	FORCEINLINE FRTMSDFTextureSettingsCache(const UTexture2D* texture) 
+	FRTMSDFTextureSettingsCache(const UTexture2D* texture) 
 	{
 		auto* defaultTexture = GetDefault<UTexture2D>();
 
@@ -59,7 +59,7 @@ struct FRTMSDFTextureSettingsCache
 #undef  CACHE
 	}
 
-	FORCEINLINE void Restore(UTexture2D* texture) const
+	void Restore(UTexture2D* texture) const
 	{
 #define RESTORE(field) texture->field = field
 		RESTORE(SRGB);

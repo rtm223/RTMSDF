@@ -100,7 +100,7 @@ UObject* URTMSDF_BitmapFactory::FactoryCreateBinary(UClass* inClass, UObject* in
 		{
 			UE_LOG(RTMSDFEditor, Warning, TEXT("[%s] No alpha information found for Distance Field generation"), *inName.ToString());
 		}
-		
+
 		texture->Source.UnlockMip(0, 0, 0);
 	}
 	else
@@ -131,7 +131,6 @@ UObject* URTMSDF_BitmapFactory::FactoryCreateBinary(UClass* inClass, UObject* in
 	FMemory::Free(sourceEdges);
 	sourceEdges = nullptr;
 
-
 	// TODO - PSD files always come in as RGBA even if they are Grayscale
 	if(!existingTexture)
 		textureSettings.CompressionSettings = numChannels == 1 ? TC_Grayscale : TC_EditorIcon;
@@ -153,7 +152,7 @@ UObject* URTMSDF_BitmapFactory::FactoryCreateBinary(UClass* inClass, UObject* in
 	{
 		UE_LOG(RTMSDFEditor, Log, TEXT("Fresh import of %s - applying default SDF settings"), *texture->GetPathName())
 	}
-	
+
 	textureSettings.Restore(texture);
 	texture->AssetImportData->Update(CurrentFilename, FileHash.IsValid() ? &FileHash : nullptr);
 	texture->PostEditChange();
@@ -282,12 +281,20 @@ void URTMSDF_BitmapFactory::CreateDistanceField(int sourceWidth, int sourceHeigh
 	const int edgeMapWidth = sourceWidth - 1;
 	const int edgeMapHeight = sourceHeight - 1;
 	const float halfFieldDistance = fieldDistance * 0.5f;
-	const float scale = static_cast<float>(sourceWidth) / static_cast<float>(sdfWidth);
 
-	static const auto edgeTest = [](const FVector2D& edgePos, const FVector2D& iPos, float& currDistSq)
+	// static const auto edgeTest = [](const FVector2D& edgePos, const FVector2D& iPos, float& currDistSq)
+	// {
+	// 	FVector2D disp = edgePos - iPos;
+	// 	const float distSq = disp.SizeSquared();
+	// 	if(distSq < currDistSq)
+	// 		currDistSq = distSq;
+	// };
+
+	static const auto edgeTest2 = [](const FVector2D& edgeStart, const FVector2D& edgeEnd, const FVector2D& iPos, float& currDistSq)
 	{
-		FVector2D disp = edgePos - iPos;
-		const float distSq = disp.SizeSquared();
+		const FVector2D closest = FMath::ClosestPointOnSegment2D(iPos, edgeStart, edgeEnd);
+		const float distSq = FVector2D::DistSquared(iPos, closest);
+
 		if(distSq < currDistSq)
 			currDistSq = distSq;
 	};
@@ -310,16 +317,42 @@ void URTMSDF_BitmapFactory::CreateDistanceField(int sourceWidth, int sourceHeigh
 		{
 			const int edgeMinX = FMath::Max(0.0f, sourcePos.X - maxDist);
 			const int edgeMaxX = FMath::Min(static_cast<float>(edgeMapWidth), sourcePos.X + maxDist);
+
 			for(int x = edgeMinX; x < edgeMaxX; x++)
 			{
-				const int testIdx = (y * edgeMapWidth + x) * 2;
-				float hEdge = edges[testIdx];
-				float vEdge = edges[testIdx + 1];
-				if(hEdge >= 0.0f)
-					edgeTest(FVector2D(x + hEdge, y), sourcePos, currDistSq);
+				const int currIdx = (y * edgeMapWidth + x) * 2;
+				const int nextColIdxUnsafe = (y * edgeMapHeight + (x + 1)) * 2;		// are these really unsafe? 
+				const int nextRowIdxUnsafe = ((y + 1) * edgeMapHeight + x) * 2;		// TODO - should be possible to make this whole thing safe
 
-				if(vEdge >= 0.0f)
-					edgeTest(FVector2D(x, y + vEdge), sourcePos, currDistSq);
+				const float topIntersection = edges[currIdx];
+				const float leftIntersection = edges[currIdx + 1];
+				const float rightIntersection = (x < edgeMapWidth - 1) ? edges[nextColIdxUnsafe + 1] : -1.0f;
+				const float bottomIntersection = (y < edgeMapHeight - 1) ? edges[nextRowIdxUnsafe] : -1.0f;
+
+				TArray<FVector2D, TInlineAllocator<4>> intersections;
+
+				if(topIntersection >= 0.0f)
+					intersections.Add(FVector2D(x + topIntersection, y));
+
+				if(bottomIntersection >= 0.0f)
+					intersections.Add(FVector2D(x + bottomIntersection, y + 1));
+
+				if(leftIntersection >= 0.0f)
+					intersections.Add(FVector2D(x, y + leftIntersection));
+
+				if(rightIntersection >= 0.0f)
+					intersections.Add(FVector2D(x + 1, y + rightIntersection));
+
+				const int numPoints = intersections.Num();
+				if(numPoints >= 2)
+					edgeTest2(intersections[0], intersections[1], sourcePos, currDistSq);
+				if(numPoints == 4)
+					edgeTest2(intersections[2], intersections[3], sourcePos, currDistSq);
+
+//				if((numPoints % 2) != 0)
+//				{
+//					UE_LOG(RTMSDFEditor, Warning, TEXT("At position [%d,%d] have %d edges, expected 0,2,4"), x, y, intersections.Num());
+//				}
 			}
 
 			maxDist = FMath::Min(FMath::Sqrt(currDistSq), maxDist);

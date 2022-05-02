@@ -321,8 +321,8 @@ void URTMSDF_BitmapFactory::CreateDistanceField(int sourceWidth, int sourceHeigh
 			for(int x = edgeMinX; x < edgeMaxX; x++)
 			{
 				const int currIdx = (y * edgeMapWidth + x) * 2;
-				const int nextColIdxUnsafe = (y * edgeMapHeight + (x + 1)) * 2;		// are these really unsafe? 
-				const int nextRowIdxUnsafe = ((y + 1) * edgeMapHeight + x) * 2;		// TODO - should be possible to make this whole thing safe
+				const int nextColIdxUnsafe = (y * edgeMapWidth + (x + 1)) * 2;		// are these really unsafe? 
+				const int nextRowIdxUnsafe = ((y + 1) * edgeMapWidth + x) * 2;		// TODO - should be possible to make this whole thing safe
 
 				const float topIntersection = edges[currIdx];
 				const float leftIntersection = edges[currIdx + 1];
@@ -337,10 +337,10 @@ void URTMSDF_BitmapFactory::CreateDistanceField(int sourceWidth, int sourceHeigh
 				if(bottomIntersection >= 0.0f)
 					intersections.Add(FVector2D(x + bottomIntersection, y + 1));
 
-				if(leftIntersection >= 0.0f)
+				if(leftIntersection > 0.0f && leftIntersection < 1.0f)
 					intersections.Add(FVector2D(x, y + leftIntersection));
 
-				if(rightIntersection >= 0.0f)
+				if(rightIntersection > 0.0f && rightIntersection < 1.0f)
 					intersections.Add(FVector2D(x + 1, y + rightIntersection));
 
 				const int numPoints = intersections.Num();
@@ -349,10 +349,18 @@ void URTMSDF_BitmapFactory::CreateDistanceField(int sourceWidth, int sourceHeigh
 				if(numPoints == 4)
 					edgeTest2(intersections[2], intersections[3], sourcePos, currDistSq);
 
-//				if((numPoints % 2) != 0)
-//				{
-//					UE_LOG(RTMSDFEditor, Warning, TEXT("At position [%d,%d] have %d edges, expected 0,2,4"), x, y, intersections.Num());
-//				}
+				// Error detection. We should always have exactly 2 or 4 points OR
+				// exactly 1 point that is on a corner (which we ignore)
+				if(numPoints == 1)
+				{
+					const bool isNotCorner = (leftIntersection > 0.0f && leftIntersection < 1.0f)
+						|| (rightIntersection > 0.0f && rightIntersection < 1.0f)
+						|| (topIntersection > 0.0f && topIntersection < 1.0f)
+						|| (bottomIntersection > 0.0f && bottomIntersection < 1.0f);
+
+					ensureAlwaysMsgf(!isNotCorner, TEXT("At position [%d,%d] have %d edges, expected 0,2,4"), x, y, intersections.Num());
+				}
+				ensureAlwaysMsgf(numPoints != 3, TEXT("At position [%d,%d] have %d edges, expected 0,2,4"), x, y, intersections.Num());
 			}
 
 			maxDist = FMath::Min(FMath::Sqrt(currDistSq), maxDist);

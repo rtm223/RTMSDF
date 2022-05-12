@@ -256,7 +256,7 @@ bool URTMSDF_BitmapFactory::FindIntersections(int width, int height, uint8* cons
 			const uint8 xPix = pixels[(mipIdx + 1) * pixelWidth + channelOffset];
 			const uint8 yPix = pixels[(mipIdx + width) * pixelWidth + channelOffset];
 
-			const float numerator = (128 - currPix);
+			const float numerator = (127 - currPix);
 			const float denominatorX = static_cast<float>(xPix - currPix);
 			const float denominatorY = static_cast<float>(yPix - currPix);
 
@@ -372,12 +372,12 @@ void URTMSDF_BitmapFactory::CreateDistanceField(int sourceWidth, int sourceHeigh
 		}
 
 		const uint8 mipVal8 = ComputePixelValue(sourcePos, sourceWidth, sourceHeight, pixels, pixelWidth, channelOffset);
-		const bool outside = mipVal8 < 128;
+		const bool outside = mipVal8 < 127;
 
 		const float dist = FMath::Sqrt(currDistSq);
 		const float signedDist = (outside ^ invertDistance) ? dist : -dist;
 		float distN = signedDist / fieldDistance + 0.5f;
-		uint8 sdfMip = FMath::Clamp(FMath::FloorToInt(distN * 256.0f), 0, 255);
+		uint8 sdfMip = FMath::Clamp(FMath::FloorToInt(distN * 255.0f), 0, 255);
 		outPixelBuffer[i * pixelWidth + channelOffset] = sdfMip;
 	});
 }

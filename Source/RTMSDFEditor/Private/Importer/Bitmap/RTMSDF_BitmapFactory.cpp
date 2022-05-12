@@ -56,6 +56,9 @@ UObject* URTMSDF_BitmapFactory::FactoryCreateBinary(UClass* inClass, UObject* in
 			textureSettings.LODGroup = defaultConfig->BitmapTextureGroup;
 		}
 	}
+	// TODO - this is overwriting the hardcoded "never SRGB" in the textureSettingsCache. Maybe wants a rethink?
+	if(importerSettings.RGBAMode == ERTMSDF_RGBAMode::PreserveRGB)
+		textureSettings.SRGB = existingTexture ? existingTexture->SRGB : true;
 
 	// let the texture factory do its thing
 	UObject* obj = Super::FactoryCreateBinary(inClass, inParent, inName, flags, context, type, buffer, bufferEnd, warn);

@@ -27,7 +27,7 @@ public:
 	virtual EReimportResult::Type Reimport(UObject* obj) override;
 
 private:
-	static bool FindIntersections(int width, int height, uint8* const pixels, int pixelWidth, int channelOffset, float* outIntersectionBuffer);
+	static bool FindIntersections(int width, int height, uint8* const pixels, int pixelWidth, int channelOffset, float* outIntersectionBuffer, uint32& outNumIntersections);
 	static void CreateDistanceField(int width, int height, uint8* const pixels, int pixelWidth, int channelOffset, float fieldDistance, bool invertDistance, float* const intersections, uint8* outPixelBuffer);
 	static void CreateDistanceField(int sourceWidth, int sourceHeight, int sdfWidth, int sdfHeight, uint8* const pixels, int pixelWidth, int channelOffset, float fieldDistance, bool invertDistance, const float* intersectionMap, uint8* outPixelBuffer);
 	static void ForceChannelValue(int width, int height, uint8* pixels, int pixelWidth, int channelOffset, uint8 value);

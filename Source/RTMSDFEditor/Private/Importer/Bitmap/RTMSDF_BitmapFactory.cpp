@@ -10,6 +10,8 @@
 #include "Importer/RTMSDFTextureSettingsCache.h"
 #include "Module/RTMSDFEditor.h"
 
+#define PREPROCESS_EDGES false
+
 class UTextureRenderTarget;
 
 URTMSDF_BitmapFactory::URTMSDF_BitmapFactory()
@@ -63,7 +65,7 @@ UObject* URTMSDF_BitmapFactory::FactoryCreateBinary(UClass* inClass, UObject* in
 	// let the texture factory do its thing
 	UObject* obj = Super::FactoryCreateBinary(inClass, inParent, inName, flags, context, type, buffer, bufferEnd, warn);
 
-	const uint64 cycleStart = FPlatformTime::Cycles();
+	const uint64 cyclesStart = FPlatformTime::Cycles();
 
 	auto texture = Cast<UTexture2D>(obj);
 	if(!isInteresting || !texture)
@@ -92,10 +94,12 @@ UObject* URTMSDF_BitmapFactory::FactoryCreateBinary(UClass* inClass, UObject* in
 	else if(importerSettings.DistanceMode == ERTMSDFDistanceMode::Pixels)
 		range = importerSettings.PixelDistance / scale;
 
-	float* sourceIntersections = (float*)FMemory::Malloc((sourceWidth - 1) * (sourceHeight - 1) * 2 * sizeof(float));
+	float* sourceIntersections = static_cast<float*>(FMemory::Malloc((sourceWidth - 1) * (sourceHeight - 1) * 2 * sizeof(float)));
+	uint32 numIntersections = 0;
+
 	if(wantPreserveRGB)
 	{
-		if(FindIntersections(sourceWidth, sourceHeight, mip, elementWidth, alphaChannel, sourceIntersections))
+		if(FindIntersections(sourceWidth, sourceHeight, mip, elementWidth, alphaChannel, sourceIntersections, numIntersections))
 		{
 			CreateDistanceField(sourceWidth, sourceHeight, mip, elementWidth, alphaChannel, range, importerSettings.InvertDistance, sourceIntersections, mip);
 		}
@@ -120,7 +124,7 @@ UObject* URTMSDF_BitmapFactory::FactoryCreateBinary(UClass* inClass, UObject* in
 				|| (i == alphaChannel && importerSettings.UsesAnyChannel(ERTMSDF_Channels::Alpha));
 
 			// OK to reuse sourceIntersections here as FindIntersections will explicitly fill the entire buffer
-			if(useChannel && FindIntersections(sourceWidth, sourceHeight, mip, elementWidth, i, sourceIntersections))
+			if(useChannel && FindIntersections(sourceWidth, sourceHeight, mip, elementWidth, i, sourceIntersections, numIntersections))
 				CreateDistanceField(sourceWidth, sourceHeight, sdfWidth, sdfHeight, mip, elementWidth, i, range, importerSettings.InvertDistance, sourceIntersections, sdfPixels);
 			else
 				ForceChannelValue(sdfWidth, sdfHeight, sdfPixels, elementWidth, i, i == alphaChannel ? 255 : 0);
@@ -162,7 +166,7 @@ UObject* URTMSDF_BitmapFactory::FactoryCreateBinary(UClass* inClass, UObject* in
 
 	const uint64 cyclesEnd = FPlatformTime::Cycles();
 
-	UE_LOG(RTMSDFEditor, Log, TEXT("Import Complete - tool %.2f miliseconds"), FPlatformTime::ToMilliseconds(cyclesEnd-cycleStart));
+	UE_LOG(RTMSDFEditor, Log, TEXT("Import Complete - %.2f miliseconds"), FPlatformTime::ToMilliseconds(cyclesEnd-cyclesStart));
 	// TODO - as above, need to work out what to do with this
 	//GEditor->GetEditorSubsystem<UImportSubsystem>()->BroadcastAssetPostImport(this, texture);
 	return texture;
@@ -241,12 +245,12 @@ EReimportResult::Type URTMSDF_BitmapFactory::Reimport(UObject* obj)
 	return EReimportResult::Type::Failed;
 }
 
-bool URTMSDF_BitmapFactory::FindIntersections(int width, int height, uint8* const pixels, int pixelWidth, int channelOffset, float* outIntersectionBuffer)
+bool URTMSDF_BitmapFactory::FindIntersections(int width, int height, uint8* const pixels, int pixelWidth, int channelOffset, float* outIntersectionBuffer, uint32& outNumIntersections)
 {
 	const int intersectionMapWidth = width - 1;
 	const int intersectionMapHeight = height - 1;
 
-	std::atomic_int64_t numFound = false;
+	std::atomic_uint32_t numFound = false;
 	ParallelFor(intersectionMapHeight, [&](const int eY)
 	{
 		for(int eX = 0; eX < intersectionMapWidth; eX++)
@@ -269,10 +273,16 @@ bool URTMSDF_BitmapFactory::FindIntersections(int width, int height, uint8* cons
 			outIntersectionBuffer[intersectionTopIdx] = intersectionTop > 1.0f ? -FLT_MAX : intersectionTop;
 			outIntersectionBuffer[intersectionLeftIdx] = intersectionLeft > 1.0f ? -FLT_MAX : intersectionLeft;
 
-			if(outIntersectionBuffer[intersectionTopIdx] >= 0.0f || outIntersectionBuffer[intersectionLeftIdx] >= 0.0f)
+			if(outIntersectionBuffer[intersectionTopIdx] >= 0.0f)
+				++numFound;
+
+			if(outIntersectionBuffer[intersectionLeftIdx] >= 0.0f)
 				++numFound;
 		}
 	});
+
+	outNumIntersections = numFound;
+	UE_LOG(RTMSDFEditor, Log, TEXT("Num Intersections = %d"), outNumIntersections);
 	return numFound > 1;
 }
 
@@ -304,14 +314,67 @@ void URTMSDF_BitmapFactory::CreateDistanceField(int sourceWidth, int sourceHeigh
 			currDistSq = distSq;
 	};
 
+#if PREPROCESS_EDGES
+	TArray<FVector2D> edgeBuffer;
+	for(int y = 0; y < intersectionMapHeight; y++)
+	{
+		for(int x = 0; x < intersectionMapWidth; x++)
+		{
+			const int currIdx = (y * intersectionMapWidth + x) * 2;
+			const int nextColIdxUnsafe = (y * intersectionMapWidth + (x + 1)) * 2;		// are these really unsafe? 
+			const int nextRowIdxUnsafe = ((y + 1) * intersectionMapWidth + x) * 2;		// TODO - should be possible to make this whole thing safe
+
+			const float topIntersection = intersectionMap[currIdx];
+			const float leftIntersection = intersectionMap[currIdx + 1];
+			const float rightIntersection = (x < intersectionMapWidth - 1) ? intersectionMap[nextColIdxUnsafe + 1] : -1.0f;
+			const float bottomIntersection = (y < intersectionMapHeight - 1) ? intersectionMap[nextRowIdxUnsafe] : -1.0f;
+
+			TArray<FVector2D, TInlineAllocator<4>> intersections;
+
+			if(topIntersection >= 0.0f)
+				intersections.Add(FVector2D(x + topIntersection, y));
+
+			if(bottomIntersection >= 0.0f)
+				intersections.Add(FVector2D(x + bottomIntersection, y + 1));
+
+			if(leftIntersection > 0.0f && leftIntersection < 1.0f)
+				intersections.Add(FVector2D(x, y + leftIntersection));
+
+			if(rightIntersection > 0.0f && rightIntersection < 1.0f)
+				intersections.Add(FVector2D(x + 1, y + rightIntersection));
+
+			const int numPoints = intersections.Num();
+			if(numPoints >= 2)
+			{
+				edgeBuffer.Add(intersections[0]);
+				edgeBuffer.Add(intersections[1]);
+			}
+			if(numPoints == 4)
+			{
+				edgeBuffer.Add(intersections[2]);
+				edgeBuffer.Add(intersections[3]);
+			}
+		}
+	}
+#endif
+
 	ParallelFor(sdfWidth * sdfHeight, [&](const int i)
 	{
 		const FVector2D sdfPos(i % sdfWidth, i / sdfWidth);
 		const FVector2D sourcePos = TransformPos(sdfWidth, sdfHeight, sourceWidth, sourceHeight, sdfPos);
 
-		float currDistSq = fieldDistance * fieldDistance;
-		float maxDist = halfFieldDistance;
+		float currDistSq = halfFieldDistance * halfFieldDistance;
 
+#if PREPROCESS_EDGES
+		for(int e = 0, numE = edgeBuffer.Num(); e < numE; e += 2)
+		{
+			// TODO - consider if there is an efficient way of utilising the shrinking currDistSq to do more aggressive skipping
+			// TODO - this should probably be || to include any edge where either of the two lines in within range. Very small false negatives at the very end of the distance field though. Seems costly
+			if((sourcePos - edgeBuffer[e]).GetAbsMax() <= halfFieldDistance && (sourcePos - edgeBuffer[e + 1]).GetAbsMax() <= halfFieldDistance)
+				edgeTest2(edgeBuffer[e], edgeBuffer[e + 1], sourcePos, currDistSq);
+		}
+#else
+		float maxDist = halfFieldDistance;
 		int edgeMinY = FMath::Max(0.0f, sourcePos.Y - maxDist);
 		int edgeMaxY = FMath::Min(static_cast<float>(intersectionMapHeight), sourcePos.Y + maxDist);
 
@@ -370,6 +433,7 @@ void URTMSDF_BitmapFactory::CreateDistanceField(int sourceWidth, int sourceHeigh
 			y = FMath::Max(y, static_cast<int>(sourcePos.Y - maxDist));
 			edgeMaxY = FMath::Min(static_cast<float>(intersectionMapHeight), sourcePos.Y + maxDist);
 		}
+#endif
 
 		const uint8 mipVal8 = ComputePixelValue(sourcePos, sourceWidth, sourceHeight, pixels, pixelWidth, channelOffset);
 		const bool outside = mipVal8 < 127;
@@ -448,3 +512,5 @@ bool URTMSDF_BitmapFactory::GetTextureFormat(ETextureSourceFormat format, int& n
 			return false;
 	}
 }
+
+#undef PREPROCESS_EDGES

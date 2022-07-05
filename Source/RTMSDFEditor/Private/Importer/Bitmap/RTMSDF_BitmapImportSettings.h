@@ -40,7 +40,7 @@ struct FRTMSDF_BitmapImportSettings : public FRTMSDF_CommonImportSettings
 	ERTMSDF_RGBAMode RGBAMode = ERTMSDF_RGBAMode::SeparateChannels;
 
 	/* Output size of generated SDF texture - for non-square textures this will be the shortest edge */
-	UPROPERTY(EditAnywhere, Category="Import", meta=(EditCondition="NumChannels > 1 && RGBAMode == ERTMSDF_RGBAMode::SeparateChannels", EditConditionHides, DisplayAfter="SDFChannels"))
+	UPROPERTY(EditAnywhere, Category="Import", meta=(EditCondition="NumChannels == 1 || RGBAMode == ERTMSDF_RGBAMode::SeparateChannels", EditConditionHides, DisplayAfter="SDFChannels"))
 	int TextureSize = 64;
 	
 	ERTMSDF_Channels GetSDFChannels() { return static_cast<ERTMSDF_Channels>(SDFChannels); }

@@ -10,8 +10,6 @@
 #include "Importer/RTMSDFTextureSettingsCache.h"
 #include "Module/RTMSDFEditor.h"
 
-#define PREPROCESS_EDGES true
-
 class UTextureRenderTarget;
 
 namespace RTM::SDF::BitmapFactoryStatics
@@ -363,14 +361,12 @@ void URTMSDF_BitmapFactory::CreateDistanceField(int sourceWidth, int sourceHeigh
 {
 	using namespace RTM::SDF::BitmapFactoryStatics;
 	
+	TArray<FVector2D> edgeBuffer;
 	const int intersectionMapWidth = sourceWidth - 1;
 	const int intersectionMapHeight = sourceHeight - 1;
 	const float halfFieldDistance = fieldDistance * 0.5f;
 
-#if PREPROCESS_EDGES
-	TArray<FVector2D> edgeBuffer;
 	FindEdges(intersectionMapHeight, intersectionMapWidth, intersectionMap, edgeBuffer);
-#endif
 
 	ParallelFor(sdfWidth * sdfHeight, [&](const int i)
 	{
@@ -379,7 +375,6 @@ void URTMSDF_BitmapFactory::CreateDistanceField(int sourceWidth, int sourceHeigh
 
 		float currDistSq = halfFieldDistance * halfFieldDistance;
 
-#if PREPROCESS_EDGES
 		for(int e = 0, numE = edgeBuffer.Num(); e < numE; e += 2)
 		{
 			// TODO - consider if there is an efficient way of utilising the shrinking currDistSq to do more aggressive skipping
@@ -387,67 +382,6 @@ void URTMSDF_BitmapFactory::CreateDistanceField(int sourceWidth, int sourceHeigh
 			if((sourcePos - edgeBuffer[e]).GetAbsMax() <= halfFieldDistance && (sourcePos - edgeBuffer[e + 1]).GetAbsMax() <= halfFieldDistance)
 				EdgeTest(edgeBuffer[e], edgeBuffer[e + 1], sourcePos, currDistSq);
 		}
-#else
-		float maxDist = halfFieldDistance;
-		int edgeMinY = FMath::Max(0.0f, sourcePos.Y - maxDist);
-		int edgeMaxY = FMath::Min(static_cast<float>(intersectionMapHeight), sourcePos.Y + maxDist);
-
-		for(int y = edgeMinY; y < edgeMaxY; y++)
-		{
-			const int edgeMinX = FMath::Max(0.0f, sourcePos.X - maxDist);
-			const int edgeMaxX = FMath::Min(static_cast<float>(intersectionMapWidth), sourcePos.X + maxDist);
-
-			for(int x = edgeMinX; x < edgeMaxX; x++)
-			{
-				const int currIdx = (y * intersectionMapWidth + x) * 2;
-				const int nextColIdxUnsafe = (y * intersectionMapWidth + (x + 1)) * 2;		// are these really unsafe? 
-				const int nextRowIdxUnsafe = ((y + 1) * intersectionMapWidth + x) * 2;		// TODO - should be possible to make this whole thing safe
-
-				const float topIntersection = intersectionMap[currIdx];
-				const float leftIntersection = intersectionMap[currIdx + 1];
-				const float rightIntersection = (x < intersectionMapWidth - 1) ? intersectionMap[nextColIdxUnsafe + 1] : -1.0f;
-				const float bottomIntersection = (y < intersectionMapHeight - 1) ? intersectionMap[nextRowIdxUnsafe] : -1.0f;
-
-				TArray<FVector2D, TInlineAllocator<4>> intersections;
-
-				if(topIntersection >= 0.0f)
-					intersections.Add(FVector2D(x + topIntersection, y));
-
-				if(bottomIntersection >= 0.0f)
-					intersections.Add(FVector2D(x + bottomIntersection, y + 1));
-
-				if(leftIntersection > 0.0f && leftIntersection < 1.0f)
-					intersections.Add(FVector2D(x, y + leftIntersection));
-
-				if(rightIntersection > 0.0f && rightIntersection < 1.0f)
-					intersections.Add(FVector2D(x + 1, y + rightIntersection));
-
-				const int numPoints = intersections.Num();
-				if(numPoints >= 2)
-					EdgeTest(intersections[0], intersections[1], sourcePos, currDistSq);
-				if(numPoints == 4)
-					EdgeTest(intersections[2], intersections[3], sourcePos, currDistSq);
-
-				// Error detection. We should always have exactly 2 or 4 points OR
-				// exactly 1 point that is on a corner (which is ignored ignore)
-				if(numPoints == 1)
-				{
-					const bool isNotCorner = (leftIntersection > 0.0f && leftIntersection < 1.0f)
-						|| (rightIntersection > 0.0f && rightIntersection < 1.0f)
-						|| (topIntersection > 0.0f && topIntersection < 1.0f)
-						|| (bottomIntersection > 0.0f && bottomIntersection < 1.0f);
-
-					ensureAlwaysMsgf(!isNotCorner, TEXT("At position [%d,%d] have %d intersections, expected 0, 2, or 4"), x, y, intersections.Num());
-				}
-				ensureAlwaysMsgf(numPoints != 3, TEXT("At position [%d,%d] have %d intersections, expected 0, 2, or 4"), x, y, intersections.Num());
-			}
-
-			// shrink the search radius after every horizontal scan and skip lines if possible
-			maxDist = FMath::Min(FMath::Sqrt(currDistSq) + 1, maxDist);
-			y = FMath::Max(y, static_cast<int>(sourcePos.Y - maxDist));
-			edgeMaxY = FMath::Min(static_cast<float>(intersectionMapHeight), sourcePos.Y + maxDist);
-		}
-#endif
 
 		const uint8 mipVal8 = ComputePixelValue(sourcePos, sourceWidth, sourceHeight, pixels, pixelWidth, channelOffset);
 		const bool outside = mipVal8 < 127;
@@ -532,5 +466,3 @@ bool URTMSDF_BitmapFactory::GetTextureFormat(ETextureSourceFormat format, TArray
 			return false;
 	}
 }
-
-#undef PREPROCESS_EDGES

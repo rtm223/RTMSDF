@@ -81,12 +81,14 @@ UObject* URTMSDF_BitmapFactory::FactoryCreateBinary(UClass* inClass, UObject* in
 	const int sourceWidth = texture->Source.GetSizeX();
 	const int sourceHeight = texture->Source.GetSizeY();
 
-	int numChannels, redChannel, greenChannel, blueChannel, alphaChannel;
-	if(!GetTextureFormat(fmt, numChannels, redChannel, blueChannel, greenChannel, alphaChannel))
+	int numSourceChannels, numDesiredChannels, redChannel, greenChannel, blueChannel, alphaChannel;
+	if(!GetTextureFormat(fmt, numSourceChannels, redChannel, blueChannel, greenChannel, alphaChannel))
 		return texture;	// return the raw asset
 
-	const bool wantPreserveRGB = numChannels > 1 && importerSettings.RGBAMode == ERTMSDF_RGBAMode::PreserveRGB;
-	const float scale = wantPreserveRGB ? 1.0f : importerSettings.TextureSize / (float)FMath::Min(sourceWidth, sourceHeight);
+	numDesiredChannels = textureSettings.CompressionSettings == TC_Grayscale || textureSettings.CompressionSettings == TC_Alpha ? 1 : numSourceChannels;
+	importerSettings.NumChannels = numDesiredChannels;
+	const bool wantPreserveRGB = numDesiredChannels > 1 && importerSettings.RGBAMode == ERTMSDF_RGBAMode::PreserveRGB;
+	const float scale = wantPreserveRGB ? 1.0f : importerSettings.TextureSize / static_cast<float>(FMath::Min(sourceWidth, sourceHeight));
 
 	float range = importerSettings.AbsoluteDistance;
 	if(importerSettings.DistanceMode == ERTMSDFDistanceMode::Normalized)
@@ -116,13 +118,20 @@ UObject* URTMSDF_BitmapFactory::FactoryCreateBinary(UClass* inClass, UObject* in
 		const int sdfHeight = sourceHeight * scale;
 		uint8* sdfPixels = static_cast<uint8*>(FMemory::Malloc(sdfHeight * sdfWidth * elementWidth));
 
-		for(int i = 0; i < numChannels; i++)
+		for(int i = 0; i < numSourceChannels; i++)
 		{
-			const bool useChannel = (i == redChannel && importerSettings.UsesAnyChannel(ERTMSDF_Channels::Red))
+			bool useChannel = false;
+			if(numDesiredChannels == 1)
+			{
+				useChannel = (i == redChannel);
+			}
+			else
+			{
+				useChannel = (i == redChannel && importerSettings.UsesAnyChannel(ERTMSDF_Channels::Red))
 				|| (i == blueChannel && importerSettings.UsesAnyChannel(ERTMSDF_Channels::Blue))
 				|| (i == greenChannel && importerSettings.UsesAnyChannel(ERTMSDF_Channels::Green))
 				|| (i == alphaChannel && importerSettings.UsesAnyChannel(ERTMSDF_Channels::Alpha));
-
+			}
 			// OK to reuse sourceIntersections here as FindIntersections will explicitly fill the entire buffer
 			if(useChannel && FindIntersections(sourceWidth, sourceHeight, mip, elementWidth, i, sourceIntersections, numIntersections))
 				CreateDistanceField(sourceWidth, sourceHeight, sdfWidth, sdfHeight, mip, elementWidth, i, range, importerSettings.InvertDistance, sourceIntersections, sdfPixels);
@@ -140,18 +149,18 @@ UObject* URTMSDF_BitmapFactory::FactoryCreateBinary(UClass* inClass, UObject* in
 
 	// TODO - PSD files always come in as RGBA even if they are Grayscale
 	if(!existingTexture)
-		textureSettings.CompressionSettings = numChannels == 1 ? TC_Grayscale : TC_EditorIcon;
+		textureSettings.CompressionSettings = numSourceChannels == 1 ? TC_Grayscale : TC_EditorIcon;
 
 	if(auto* assetData = texture->GetAssetUserData<URTMSDF_BitmapImportAssetData>())
 	{
-		assetData->ImportSettings.NumChannels = numChannels;
+		assetData->ImportSettings.NumChannels = numDesiredChannels;
 	}
 	else
 	{
 		auto importData = NewObject<URTMSDF_BitmapImportAssetData>(texture, NAME_None, flags);
 		importData->ImportSettings = importerSettings;
 		// force num channels to 1 in the settings if user has selected single channel image 
-		importData->ImportSettings.NumChannels = textureSettings.CompressionSettings == TC_Grayscale || textureSettings.CompressionSettings == TC_Alpha ? 1 : numChannels;
+		importData->ImportSettings.NumChannels = numDesiredChannels;
 		texture->AddAssetUserData(importData);
 	}
 

@@ -120,18 +120,11 @@ UObject* URTMSDF_BitmapFactory::FactoryCreateBinary(UClass* inClass, UObject* in
 
 		for(int i = 0; i < numSourceChannels; i++)
 		{
-			bool useChannel = false;
-			if(numDesiredChannels == 1)
-			{
-				useChannel = (i == redChannel);
-			}
-			else
-			{
-				useChannel = (i == redChannel && importerSettings.UsesAnyChannel(ERTMSDF_Channels::Red))
+			const bool useChannel = (i == redChannel && importerSettings.UsesAnyChannel(ERTMSDF_Channels::Red))
 				|| (i == blueChannel && importerSettings.UsesAnyChannel(ERTMSDF_Channels::Blue))
 				|| (i == greenChannel && importerSettings.UsesAnyChannel(ERTMSDF_Channels::Green))
 				|| (i == alphaChannel && importerSettings.UsesAnyChannel(ERTMSDF_Channels::Alpha));
-			}
+
 			// OK to reuse sourceIntersections here as FindIntersections will explicitly fill the entire buffer
 			if(useChannel && FindIntersections(sourceWidth, sourceHeight, mip, elementWidth, i, sourceIntersections, numIntersections))
 				CreateDistanceField(sourceWidth, sourceHeight, sdfWidth, sdfHeight, mip, elementWidth, i, range, importerSettings.InvertDistance, sourceIntersections, sdfPixels);

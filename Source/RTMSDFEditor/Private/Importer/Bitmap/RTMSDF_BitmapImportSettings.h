@@ -43,9 +43,9 @@ struct FRTMSDF_BitmapImportSettings : public FRTMSDF_CommonImportSettings
 	UPROPERTY(EditAnywhere, Category="Import", meta=(EditCondition="NumChannels == 1 || RGBAMode == ERTMSDF_RGBAMode::SeparateChannels", EditConditionHides, DisplayAfter="SDFChannels"))
 	int TextureSize = 64;
 	
-	ERTMSDF_Channels GetSDFChannels() { return static_cast<ERTMSDF_Channels>(SDFChannels); }
-	bool UsesAnyChannel(ERTMSDF_Channels channelMask) { return 0 != (static_cast<uint8>(channelMask) & SDFChannels); }
-	bool UsesChannels(ERTMSDF_Channels channelMask) { return static_cast<uint8>(channelMask) == (static_cast<uint8>(channelMask) & SDFChannels); }
+	ERTMSDF_Channels GetSDFChannels() { return NumChannels > 1 ? static_cast<ERTMSDF_Channels>(SDFChannels) : ERTMSDF_Channels::Red; }
+	bool UsesAnyChannel(ERTMSDF_Channels channelMask) { return 0 != (static_cast<uint8>(channelMask) & static_cast<uint8>(GetSDFChannels())); }
+	bool UsesChannels(ERTMSDF_Channels channelMask) { return static_cast<uint8>(channelMask) == (static_cast<uint8>(channelMask) & static_cast<uint8>(GetSDFChannels())); }
 
 protected:
 	/* Which channels should be used to generate SDFs - unused channels will be discarded */

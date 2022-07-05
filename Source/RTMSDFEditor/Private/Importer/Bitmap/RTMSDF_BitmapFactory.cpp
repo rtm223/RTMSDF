@@ -14,6 +14,18 @@
 
 class UTextureRenderTarget;
 
+namespace RTM::SDF::BitmapFactoryStatics
+{
+	static void EdgeTest(const FVector2D& edgeStart, const FVector2D& edgeEnd, const FVector2D& iPos, float& currDistSq)
+	{
+		const FVector2D closest = FMath::ClosestPointOnSegment2D(iPos, edgeStart, edgeEnd);
+		const float distSq = FVector2D::DistSquared(iPos, closest);
+
+		if(distSq < currDistSq)
+			currDistSq = distSq;
+	}
+}
+
 URTMSDF_BitmapFactory::URTMSDF_BitmapFactory()
 {
 	// Import priority is super high - we want to jump in and test for SDF filenames or user assets
@@ -300,23 +312,10 @@ void URTMSDF_BitmapFactory::CreateDistanceField(int width, int height, uint8* co
 	CreateDistanceField(width, height, width, height, pixels, pixelWidth, channelOffset, fieldDistance, invertDistance, intersections, outPixelBuffer);
 }
 
-void URTMSDF_BitmapFactory::CreateDistanceField(int sourceWidth, int sourceHeight, int sdfWidth, int sdfHeight, uint8* const pixels, int pixelWidth, int channelOffset, float fieldDistance, bool invertDistance, const float* intersectionMap, uint8* outPixelBuffer)
+bool URTMSDF_BitmapFactory::FindEdges(int intersectionMapHeight, int intersectionMapWidth, const float* intersectionMap, TArray<FVector2D>& edgeBuffer)
 {
-	const int intersectionMapWidth = sourceWidth - 1;
-	const int intersectionMapHeight = sourceHeight - 1;
-	const float halfFieldDistance = fieldDistance * 0.5f;
+	edgeBuffer.Reset();
 
-	static const auto edgeTest2 = [](const FVector2D& edgeStart, const FVector2D& edgeEnd, const FVector2D& iPos, float& currDistSq)
-	{
-		const FVector2D closest = FMath::ClosestPointOnSegment2D(iPos, edgeStart, edgeEnd);
-		const float distSq = FVector2D::DistSquared(iPos, closest);
-
-		if(distSq < currDistSq)
-			currDistSq = distSq;
-	};
-
-#if PREPROCESS_EDGES
-	TArray<FVector2D> edgeBuffer;
 	for(int y = 0; y < intersectionMapHeight; y++)
 	{
 		for(int x = 0; x < intersectionMapWidth; x++)
@@ -330,7 +329,7 @@ void URTMSDF_BitmapFactory::CreateDistanceField(int sourceWidth, int sourceHeigh
 			const float rightIntersection = (x < intersectionMapWidth - 1) ? intersectionMap[nextColIdxUnsafe + 1] : -1.0f;
 			const float bottomIntersection = (y < intersectionMapHeight - 1) ? intersectionMap[nextRowIdxUnsafe] : -1.0f;
 
-			TArray<FVector2D, TInlineAllocator<4>> intersections;
+			TArray<FVector2D, TFixedAllocator<4>> intersections;
 
 			if(topIntersection >= 0.0f)
 				intersections.Add(FVector2D(x + topIntersection, y));
@@ -357,6 +356,20 @@ void URTMSDF_BitmapFactory::CreateDistanceField(int sourceWidth, int sourceHeigh
 			}
 		}
 	}
+	return edgeBuffer.Num() > 0;
+}
+
+void URTMSDF_BitmapFactory::CreateDistanceField(int sourceWidth, int sourceHeight, int sdfWidth, int sdfHeight, uint8* const pixels, int pixelWidth, int channelOffset, float fieldDistance, bool invertDistance, const float* intersectionMap, uint8* outPixelBuffer)
+{
+	using namespace RTM::SDF::BitmapFactoryStatics;
+	
+	const int intersectionMapWidth = sourceWidth - 1;
+	const int intersectionMapHeight = sourceHeight - 1;
+	const float halfFieldDistance = fieldDistance * 0.5f;
+
+#if PREPROCESS_EDGES
+	TArray<FVector2D> edgeBuffer;
+	FindEdges(intersectionMapHeight, intersectionMapWidth, intersectionMap, edgeBuffer);
 #endif
 
 	ParallelFor(sdfWidth * sdfHeight, [&](const int i)
@@ -372,7 +385,7 @@ void URTMSDF_BitmapFactory::CreateDistanceField(int sourceWidth, int sourceHeigh
 			// TODO - consider if there is an efficient way of utilising the shrinking currDistSq to do more aggressive skipping
 			// TODO - this should probably be || to include any edge where either of the two lines in within range. Very small false negatives at the very end of the distance field though. Seems costly
 			if((sourcePos - edgeBuffer[e]).GetAbsMax() <= halfFieldDistance && (sourcePos - edgeBuffer[e + 1]).GetAbsMax() <= halfFieldDistance)
-				edgeTest2(edgeBuffer[e], edgeBuffer[e + 1], sourcePos, currDistSq);
+				EdgeTest(edgeBuffer[e], edgeBuffer[e + 1], sourcePos, currDistSq);
 		}
 #else
 		float maxDist = halfFieldDistance;
@@ -411,9 +424,9 @@ void URTMSDF_BitmapFactory::CreateDistanceField(int sourceWidth, int sourceHeigh
 
 				const int numPoints = intersections.Num();
 				if(numPoints >= 2)
-					edgeTest2(intersections[0], intersections[1], sourcePos, currDistSq);
+					EdgeTest(intersections[0], intersections[1], sourcePos, currDistSq);
 				if(numPoints == 4)
-					edgeTest2(intersections[2], intersections[3], sourcePos, currDistSq);
+					EdgeTest(intersections[2], intersections[3], sourcePos, currDistSq);
 
 				// Error detection. We should always have exactly 2 or 4 points OR
 				// exactly 1 point that is on a corner (which is ignored ignore)

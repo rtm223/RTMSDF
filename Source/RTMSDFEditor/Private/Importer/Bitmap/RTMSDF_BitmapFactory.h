@@ -7,6 +7,8 @@
 #include "Factories/TextureFactory.h"
 #include "RTMSDF_BitmapFactory.generated.h"
 
+enum class ERTMSDF_Channels : uint8;
+
 UCLASS()
 class RTMSDFEDITOR_API URTMSDF_BitmapFactory : public UTextureFactory, public FReimportHandler
 {
@@ -33,5 +35,5 @@ private:
 	static void ForceChannelValue(int width, int height, uint8* pixels, int pixelWidth, int channelOffset, uint8 value);
 	static FVector2D TransformPos(float fromWidth, float fromHeight, float toWidth, float toHeight, const FVector2D& fromVec);
 	static uint8 ComputePixelValue(FVector2D pos, int width, int height, uint8* const buffer, int pixelWidth, int channelOffset);
-	static bool GetTextureFormat(ETextureSourceFormat format, int& numChannels, int& outRed, int& outBlue, int& outGreen, int& outAlpha);
+	static bool GetTextureFormat(ETextureSourceFormat format, TArray<ERTMSDF_Channels, TFixedAllocator<4>>& channelPositions);
 };

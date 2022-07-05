@@ -81,14 +81,16 @@ UObject* URTMSDF_BitmapFactory::FactoryCreateBinary(UClass* inClass, UObject* in
 	const int sourceWidth = texture->Source.GetSizeX();
 	const int sourceHeight = texture->Source.GetSizeY();
 
-	int numSourceChannels, numDesiredChannels, redChannel, greenChannel, blueChannel, alphaChannel;
-	if(!GetTextureFormat(fmt, numSourceChannels, redChannel, blueChannel, greenChannel, alphaChannel))
+	TArray<ERTMSDF_Channels, TFixedAllocator<4>> channelColors;
+	if(!GetTextureFormat(fmt, channelColors))
 		return texture;	// return the raw asset
 
-	numDesiredChannels = textureSettings.CompressionSettings == TC_Grayscale || textureSettings.CompressionSettings == TC_Alpha ? 1 : numSourceChannels;
-	importerSettings.NumChannels = numDesiredChannels;
+	const int numSourceChannels = channelColors.Num();
+	const int numDesiredChannels = textureSettings.CompressionSettings == TC_Grayscale || textureSettings.CompressionSettings == TC_Alpha ? 1 : numSourceChannels;
 	const bool wantPreserveRGB = numDesiredChannels > 1 && importerSettings.RGBAMode == ERTMSDF_RGBAMode::PreserveRGB;
 	const float scale = wantPreserveRGB ? 1.0f : importerSettings.TextureSize / static_cast<float>(FMath::Min(sourceWidth, sourceHeight));
+
+	importerSettings.NumChannels = numDesiredChannels;
 
 	float range = importerSettings.AbsoluteDistance;
 	if(importerSettings.DistanceMode == ERTMSDFDistanceMode::Normalized)
@@ -101,13 +103,19 @@ UObject* URTMSDF_BitmapFactory::FactoryCreateBinary(UClass* inClass, UObject* in
 
 	if(wantPreserveRGB)
 	{
-		if(FindIntersections(sourceWidth, sourceHeight, mip, elementWidth, alphaChannel, sourceIntersections, numIntersections))
+		for(int i = 0, num = channelColors.Num(); i < num; i++)
 		{
-			CreateDistanceField(sourceWidth, sourceHeight, mip, elementWidth, alphaChannel, range, importerSettings.InvertDistance, sourceIntersections, mip);
-		}
-		else
-		{
-			UE_LOG(RTMSDFEditor, Warning, TEXT("[%s] No alpha information found for Distance Field generation"), *inName.ToString());
+			if(channelColors[i] == ERTMSDF_Channels::Alpha)
+			{
+				if(FindIntersections(sourceWidth, sourceHeight, mip, elementWidth, i, sourceIntersections, numIntersections))
+				{
+					CreateDistanceField(sourceWidth, sourceHeight, mip, elementWidth, i, range, importerSettings.InvertDistance, sourceIntersections, mip);
+				}
+				else
+				{
+					UE_LOG(RTMSDFEditor, Warning, TEXT("[%s] No alpha information found for Distance Field generation"), *inName.ToString());
+				}
+			}
 		}
 
 		texture->Source.UnlockMip(0, 0, 0);
@@ -120,16 +128,13 @@ UObject* URTMSDF_BitmapFactory::FactoryCreateBinary(UClass* inClass, UObject* in
 
 		for(int i = 0; i < numSourceChannels; i++)
 		{
-			const bool useChannel = (i == redChannel && importerSettings.UsesAnyChannel(ERTMSDF_Channels::Red))
-				|| (i == blueChannel && importerSettings.UsesAnyChannel(ERTMSDF_Channels::Blue))
-				|| (i == greenChannel && importerSettings.UsesAnyChannel(ERTMSDF_Channels::Green))
-				|| (i == alphaChannel && importerSettings.UsesAnyChannel(ERTMSDF_Channels::Alpha));
+			const bool useChannel = importerSettings.UsesAnyChannel(channelColors[i]);
 
 			// OK to reuse sourceIntersections here as FindIntersections will explicitly fill the entire buffer
 			if(useChannel && FindIntersections(sourceWidth, sourceHeight, mip, elementWidth, i, sourceIntersections, numIntersections))
 				CreateDistanceField(sourceWidth, sourceHeight, sdfWidth, sdfHeight, mip, elementWidth, i, range, importerSettings.InvertDistance, sourceIntersections, sdfPixels);
 			else
-				ForceChannelValue(sdfWidth, sdfHeight, sdfPixels, elementWidth, i, i == alphaChannel ? 255 : 0);
+				ForceChannelValue(sdfWidth, sdfHeight, sdfPixels, elementWidth, i, channelColors[i] == ERTMSDF_Channels::Alpha ? 255 : 0);
 		}
 
 		texture->Source.UnlockMip(0, 0, 0);
@@ -298,14 +303,6 @@ void URTMSDF_BitmapFactory::CreateDistanceField(int sourceWidth, int sourceHeigh
 	const int intersectionMapWidth = sourceWidth - 1;
 	const int intersectionMapHeight = sourceHeight - 1;
 	const float halfFieldDistance = fieldDistance * 0.5f;
-
-	// static const auto edgeTest = [](const FVector2D& edgePos, const FVector2D& iPos, float& currDistSq)
-	// {
-	// 	FVector2D disp = edgePos - iPos;
-	// 	const float distSq = disp.SizeSquared();
-	// 	if(distSq < currDistSq)
-	// 		currDistSq = distSq;
-	// };
 
 	static const auto edgeTest2 = [](const FVector2D& edgeStart, const FVector2D& edgeEnd, const FVector2D& iPos, float& currDistSq)
 	{
@@ -498,23 +495,17 @@ uint8 URTMSDF_BitmapFactory::ComputePixelValue(FVector2D pos, int width, int hei
 	return static_cast<uint8>(FMath::RoundToInt(topVal * (1.0f - bottomWeight) + bottomVal * bottomWeight));
 }
 
-bool URTMSDF_BitmapFactory::GetTextureFormat(ETextureSourceFormat format, int& numChannels, int& outRed, int& outBlue, int& outGreen, int& outAlpha)
+bool URTMSDF_BitmapFactory::GetTextureFormat(ETextureSourceFormat format, TArray<ERTMSDF_Channels, TFixedAllocator<4>>& channelPositions)
 {
 	switch(format)
 	{
 		case TSF_G8:
-			numChannels = 1;
-			outAlpha = 1;
-			outRed = outBlue = outGreen = -1;
+			channelPositions.Add(ERTMSDF_Channels::Alpha);
 			return true;
 
 		case TSF_BGRA8:
 		case TSF_BGRE8:		// unsure what the e is for?
-			numChannels = 4;
-			outBlue = 0;
-			outGreen = 1;
-			outRed = 2;
-			outAlpha = 3;
+			channelPositions.Append({ERTMSDF_Channels::Blue, ERTMSDF_Channels::Green, ERTMSDF_Channels::Red, ERTMSDF_Channels::Alpha});
 			return true;
 
 		case TSF_RGBA16:

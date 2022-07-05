@@ -448,10 +448,22 @@ void URTMSDF_BitmapFactory::CreateDistanceField(int sourceWidth, int sourceHeigh
 
 void URTMSDF_BitmapFactory::ForceChannelValue(int width, int height, uint8* pixels, int pixelWidth, int channelOffset, uint8 value)
 {
-	ParallelFor(width * height, [&](const int i)
+	if(width < 1024)	// needs particularly wide rows for a ParallelFor to help
 	{
-		pixels[i * pixelWidth + channelOffset] = value;
-	});
+		for(int i = 0, num = width * height; i < num; i++)
+			pixels[i * pixelWidth + channelOffset] = value;
+	}
+	else
+	{
+		ParallelFor(height, [&](const int y)
+		{
+			for(int x = 0; x < width; x++)
+			{
+				const int i = y * width + x;
+				pixels[i * pixelWidth + channelOffset] = value;
+			}
+		});
+	}
 }
 
 FVector2D URTMSDF_BitmapFactory::TransformPos(float fromWidth, float fromHeight, float toWidth, float toHeight, const FVector2D& fromVec)

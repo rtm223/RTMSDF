@@ -10,7 +10,7 @@
 #include "Importer/RTMSDFTextureSettingsCache.h"
 #include "Module/RTMSDFEditor.h"
 
-#define PREPROCESS_EDGES false
+#define PREPROCESS_EDGES true
 
 class UTextureRenderTarget;
 

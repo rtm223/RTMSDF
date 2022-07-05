@@ -124,8 +124,10 @@ UObject* URTMSDF_BitmapFactory::FactoryCreateBinary(UClass* inClass, UObject* in
 	{
 		const int sdfWidth = sourceWidth * scale;
 		const int sdfHeight = sourceHeight * scale;
+		const int bufferLen = sdfHeight * sdfWidth * elementWidth;
 		uint8* sdfPixels = static_cast<uint8*>(FMemory::Malloc(sdfHeight * sdfWidth * elementWidth));
-
+		FMemory::Memset(sdfPixels, 0, bufferLen);
+		
 		for(int i = 0; i < numSourceChannels; i++)
 		{
 			const bool useChannel = importerSettings.UsesAnyChannel(channelColors[i]);
@@ -133,8 +135,8 @@ UObject* URTMSDF_BitmapFactory::FactoryCreateBinary(UClass* inClass, UObject* in
 			// OK to reuse sourceIntersections here as FindIntersections will explicitly fill the entire buffer
 			if(useChannel && FindIntersections(sourceWidth, sourceHeight, mip, elementWidth, i, sourceIntersections, numIntersections))
 				CreateDistanceField(sourceWidth, sourceHeight, sdfWidth, sdfHeight, mip, elementWidth, i, range, importerSettings.InvertDistance, sourceIntersections, sdfPixels);
-			else
-				ForceChannelValue(sdfWidth, sdfHeight, sdfPixels, elementWidth, i, channelColors[i] == ERTMSDF_Channels::Alpha ? 255 : 0);
+			else if(channelColors[i] == ERTMSDF_Channels::Alpha)
+				ForceChannelValue(sdfWidth, sdfHeight, sdfPixels, elementWidth, i, 255);
 		}
 
 		texture->Source.UnlockMip(0, 0, 0);

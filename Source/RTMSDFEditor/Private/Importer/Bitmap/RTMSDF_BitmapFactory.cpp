@@ -10,14 +10,34 @@
 #include "Importer/RTMSDFTextureSettingsCache.h"
 #include "Module/RTMSDFEditor.h"
 
-class UTextureRenderTarget;
-
 namespace RTM::SDF::BitmapFactoryStatics
 {
-	static void EdgeTest(const FVector2D& edgeStart, const FVector2D& edgeEnd, const FVector2D& iPos, float& currDistSq)
+	using FVector2DFloatType = URTMSDF_BitmapFactory::FVector2DFloatType;
+	FVector2DFloatType ClosestPointOnSegment2D(const FVector2DFloatType &point, const FVector2DFloatType &startPoint, const FVector2DFloatType &endPoint)
 	{
-		const FVector2D closest = FMath::ClosestPointOnSegment2D(iPos, edgeStart, edgeEnd);
-		const float distSq = FVector2D::DistSquared(iPos, closest);
+		// Duplicated from FMath::ClosestPointOnSegment2D so we have a floating point version in UE5
+		
+		const FVector2DFloatType segment = endPoint - startPoint;
+		const FVector2DFloatType vectToPoint = point - startPoint;
+
+		// See if closest point is before startPoint
+		const float dot1 = vectToPoint | segment;
+		if (dot1 <= 0)
+			return startPoint;
+
+		// See if closest point is beyond endPoint
+		const float dot2 = segment | segment;
+		if (dot2 <= dot1)
+			return endPoint;
+
+		// Closest point is within segment
+		return startPoint + segment * (dot1 / dot2);
+	}
+	
+	static void EdgeTest(const FVector2DFloatType& edgeStart, const FVector2DFloatType& edgeEnd, const FVector2DFloatType& iPos, float& currDistSq)
+	{
+		const FVector2DFloatType closest = ClosestPointOnSegment2D(iPos, edgeStart, edgeEnd);
+		const float distSq = FVector2DFloatType::DistSquared(iPos, closest);
 
 		if(distSq < currDistSq)
 			currDistSq = distSq;
@@ -310,7 +330,7 @@ void URTMSDF_BitmapFactory::CreateDistanceField(int width, int height, uint8* co
 	CreateDistanceField(width, height, width, height, pixels, pixelWidth, channelOffset, fieldDistance, invertDistance, intersections, outPixelBuffer);
 }
 
-bool URTMSDF_BitmapFactory::FindEdges(int intersectionMapHeight, int intersectionMapWidth, const float* intersectionMap, TArray<FVector2D>& edgeBuffer)
+bool URTMSDF_BitmapFactory::FindEdges(int intersectionMapHeight, int intersectionMapWidth, const float* intersectionMap, TArray<FVector2DFloatType>& edgeBuffer)
 {
 	edgeBuffer.Reset();
 
@@ -327,19 +347,19 @@ bool URTMSDF_BitmapFactory::FindEdges(int intersectionMapHeight, int intersectio
 			const float rightIntersection = (x < intersectionMapWidth - 1) ? intersectionMap[nextColIdxUnsafe + 1] : -1.0f;
 			const float bottomIntersection = (y < intersectionMapHeight - 1) ? intersectionMap[nextRowIdxUnsafe] : -1.0f;
 
-			TArray<FVector2D, TFixedAllocator<4>> intersections;
+			TArray<FVector2DFloatType, TFixedAllocator<4>> intersections;
 
 			if(topIntersection >= 0.0f)
-				intersections.Add(FVector2D(x + topIntersection, y));
+				intersections.Add(FVector2DFloatType(x + topIntersection, y));
 
 			if(bottomIntersection >= 0.0f)
-				intersections.Add(FVector2D(x + bottomIntersection, y + 1));
+				intersections.Add(FVector2DFloatType(x + bottomIntersection, y + 1));
 
 			if(leftIntersection > 0.0f && leftIntersection < 1.0f)
-				intersections.Add(FVector2D(x, y + leftIntersection));
+				intersections.Add(FVector2DFloatType(x, y + leftIntersection));
 
 			if(rightIntersection > 0.0f && rightIntersection < 1.0f)
-				intersections.Add(FVector2D(x + 1, y + rightIntersection));
+				intersections.Add(FVector2DFloatType(x + 1, y + rightIntersection));
 
 			const int numPoints = intersections.Num();
 			if(numPoints >= 2)
@@ -361,7 +381,7 @@ void URTMSDF_BitmapFactory::CreateDistanceField(int sourceWidth, int sourceHeigh
 {
 	using namespace RTM::SDF::BitmapFactoryStatics;
 	
-	TArray<FVector2D> edgeBuffer;
+	TArray<FVector2DFloatType> edgeBuffer;
 	const int intersectionMapWidth = sourceWidth - 1;
 	const int intersectionMapHeight = sourceHeight - 1;
 	const float halfFieldDistance = fieldDistance * 0.5f;
@@ -370,8 +390,8 @@ void URTMSDF_BitmapFactory::CreateDistanceField(int sourceWidth, int sourceHeigh
 
 	ParallelFor(sdfWidth * sdfHeight, [&](const int i)
 	{
-		const FVector2D sdfPos(i % sdfWidth, i / sdfWidth);
-		const FVector2D sourcePos = TransformPos(sdfWidth, sdfHeight, sourceWidth, sourceHeight, sdfPos);
+		const FVector2DFloatType sdfPos(i % sdfWidth, i / sdfWidth);
+		const FVector2DFloatType sourcePos = TransformPos(sdfWidth, sdfHeight, sourceWidth, sourceHeight, sdfPos);
 
 		float currDistSq = halfFieldDistance * halfFieldDistance;
 
@@ -414,19 +434,19 @@ void URTMSDF_BitmapFactory::ForceChannelValue(int width, int height, uint8* pixe
 	}
 }
 
-FVector2D URTMSDF_BitmapFactory::TransformPos(float fromWidth, float fromHeight, float toWidth, float toHeight, const FVector2D& fromVec)
+URTMSDF_BitmapFactory::FVector2DFloatType URTMSDF_BitmapFactory::TransformPos(float fromWidth, float fromHeight, float toWidth, float toHeight, const FVector2DFloatType& fromVec)
 {
-	FVector2D toCenter = (FVector2D(toWidth, toHeight) - 1.0f) / 2.0f;
-	FVector2D fromCenter = (FVector2D(fromWidth, fromHeight) - 1.0f) / 2.0f;
-	FVector2D fromPos = fromVec - fromCenter;
-	FVector2D toPos = fromPos * FVector2D(toWidth / fromWidth, toHeight / fromHeight);
+	FVector2DFloatType toCenter = (FVector2DFloatType(toWidth, toHeight) - 1.0f) / 2.0f;
+	FVector2DFloatType fromCenter = (FVector2DFloatType(fromWidth, fromHeight) - 1.0f) / 2.0f;
+	FVector2DFloatType fromPos = fromVec - fromCenter;
+	FVector2DFloatType toPos = fromPos * FVector2DFloatType(toWidth / fromWidth, toHeight / fromHeight);
 	return toCenter + toPos;
 }
 
-uint8 URTMSDF_BitmapFactory::ComputePixelValue(FVector2D pos, int width, int height, uint8* const buffer, int pixelWidth, int channelOffset)
+uint8 URTMSDF_BitmapFactory::ComputePixelValue(FVector2DFloatType pos, int width, int height, uint8* const buffer, int pixelWidth, int channelOffset)
 {
 	auto index = [width, pixelWidth, channelOffset](int x, int y) { return (y * width + x) * pixelWidth + channelOffset; };
-	pos = FVector2D(FMath::Clamp(pos.X, 0.0f, width - 1.0f), FMath::Clamp(pos.Y, 0.0f, width - 1.0f));
+	pos = FVector2DFloatType(FMath::Clamp(pos.X, 0.0f, width - 1.0f), FMath::Clamp(pos.Y, 0.0f, width - 1.0f));
 	const int top = FMath::FloorToInt(pos.Y);
 	const int left = FMath::FloorToInt(pos.X);
 	const int bottom = FMath::Min(top + 1, height - 1);

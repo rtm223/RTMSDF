@@ -13,6 +13,9 @@
 #include "EditorFramework/AssetImportData.h"
 #include "Engine/Texture2DArray.h"
 #include "Module/RTMSDFEditor.h"
+#if ENGINE_MAJOR_VERSION >=5 && ENGINE_MINOR_VERSION >=2
+#include "TextureReferenceResolver.h"
+#endif
 
 URTMSDF_SVGFactory::URTMSDF_SVGFactory()
 {
@@ -85,7 +88,7 @@ UObject* URTMSDF_SVGFactory::FactoryCreateBinary(UClass* inClass, UObject* inPar
 	shape.normalize();
 	// TODO VAlidate shape: shape.validate()
 	// 	shape.validate();
-	
+
 
 	UTexture2D* texture = nullptr;
 	if(auto newObject = CreateOrOverwriteAsset(inClass, inParent, inName, flags))
@@ -113,7 +116,7 @@ UObject* URTMSDF_SVGFactory::FactoryCreateBinary(UClass* inClass, UObject* inPar
 #else
 	shape.orientContours();
 #endif
-	
+
 	double range = importerSettings.AbsoluteDistance;
 	if(importerSettings.DistanceMode == ERTMSDFDistanceMode::Normalized)
 		range = importerSettings.NormalizedDistance * min(svgDims.x, svgDims.y);
@@ -132,7 +135,7 @@ UObject* URTMSDF_SVGFactory::FactoryCreateBinary(UClass* inClass, UObject* inPar
 	{
 		UE_LOG(RTMSDFEditor, Log, TEXT("Fresh import of %s - applying default SDF settings"), *texture->GetPathName())
 	}
-	
+
 	UpdateNewTextureSettings(texture, textureSettings, importerSettings.Format);
 
 	texture->AssetImportData->Update(CurrentFilename, FileHash.IsValid() ? &FileHash : nullptr);

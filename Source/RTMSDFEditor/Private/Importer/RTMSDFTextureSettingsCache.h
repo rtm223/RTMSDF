@@ -2,10 +2,16 @@
 
 #pragma once
 
+#if ENGINE_MAJOR_VERSION >=5 && ENGINE_MINOR_VERSION >=1
+#define HAS_DITHER_MIPMAP_ALPHA 0
+#else
+#define HAS_DITHER_MIPMAP_ALPHA 1
+#endif
+
 struct FRTMSDFTextureSettingsCache
 {
 	// TODO - review all the settings in a texture and set this up properly
-	
+
 	bool SRGB;
 	bool bFlipGreenChannel;
 	TextureAddress AddressX;
@@ -22,11 +28,13 @@ struct FRTMSDFTextureSettingsCache
 	bool CompressionNone;
 	bool DeferCompression;
 	bool CompressionNoAlpha;
+#if	HAS_DITHER_MIPMAP_ALPHA
 	bool bDitherMipMapAlpha;
+#endif
 	bool VirtualTextureStreaming;
 	FVector4 AlphaCoverageThresholds;
 
-	FRTMSDFTextureSettingsCache(const UTexture2D* texture) 
+	FRTMSDFTextureSettingsCache(const UTexture2D* texture)
 	{
 		auto* defaultTexture = GetDefault<UTexture2D>();
 
@@ -39,7 +47,7 @@ struct FRTMSDFTextureSettingsCache
 		CACHE(AddressX, TA_Clamp);
 		CACHE(AddressY, TA_Clamp);
 #undef  CACHE
-		
+
 #define CACHE(field) field = texture ? texture->field : defaultTexture->field;
 		CACHE(PowerOfTwoMode);
 		CACHE(PaddingColor);
@@ -53,7 +61,9 @@ struct FRTMSDFTextureSettingsCache
 		CACHE(CompressionNone);
 		CACHE(DeferCompression);
 		CACHE(CompressionNoAlpha);
+#if HAS_DITHER_MIPMAP_ALPHA
 		CACHE(bDitherMipMapAlpha);
+#endif
 		CACHE(VirtualTextureStreaming);
 		CACHE(AlphaCoverageThresholds);
 #undef  CACHE
@@ -78,9 +88,13 @@ struct FRTMSDFTextureSettingsCache
 		RESTORE(CompressionNone);
 		RESTORE(DeferCompression);
 		RESTORE(CompressionNoAlpha);
+#if HAS_DITHER_MIPMAP_ALPHA
 		RESTORE(bDitherMipMapAlpha);
+#endif
 		RESTORE(VirtualTextureStreaming);
 		RESTORE(AlphaCoverageThresholds);
-#undef  RESTORE		
+#undef  RESTORE
 	}
 };
+
+#undef HAS_DITHER_MIPMAP_ALPHA

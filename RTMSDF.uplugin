@@ -19,12 +19,12 @@
 		{
 			"Name": "RTMSDFEditor",
 			"Type": "Editor",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "PreDefault"
 		},
 		{
 			"Name": "ChlumskyMSDFGen",
 			"Type": "Editor",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "PreDefault"
 		}
 	],
 	"PreBuildSteps": {

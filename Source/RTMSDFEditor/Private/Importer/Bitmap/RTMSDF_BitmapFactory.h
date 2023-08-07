@@ -10,7 +10,7 @@
 enum class ERTMSDF_Channels : uint8;
 
 UCLASS()
-class RTMSDFEDITOR_API URTMSDF_BitmapFactory : public UTextureFactory, public FReimportHandler
+class URTMSDF_BitmapFactory : public UTextureFactory, public FReimportHandler
 {
 	GENERATED_BODY()
 

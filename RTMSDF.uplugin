@@ -3,6 +3,7 @@
 	"Version": 0,
 	"VersionName": "0.1",
 	"FriendlyName": "SDF Tools",
+	"EditorCustomVirtualPath": "RTM",
 	"Description": "Importers for creating SDFs from .svg source files and all Unreal-supported texture source files",
 	"Category": "Richard Meredith",
 	"CreatedBy": "Richard Meredith",
@@ -25,5 +26,10 @@
 			"Type": "Editor",
 			"LoadingPhase": "Default"
 		}
-	] 
+	],
+	"PreBuildSteps": {
+		"Win64": [
+			"if exist $(PluginDir)\\Binaries\\Win64\\*.patch* del $(PluginDir)\\Binaries\\Win64\\*.patch*"
+		]
+	}
 }

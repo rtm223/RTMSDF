@@ -34,6 +34,7 @@ Uses [MSDFGen](https://github.com/Chlumsky/msdfgen) for processing of SVG files
 * Blueprint library to query SDF features (distance field range, source asset size, at runtime)
 * [Untested] Support for Linux / Mac (though with limitations on SVGs, ee below)
 * Much nicer thumbnails
+* Many many many bugfixes for stability and handling edge cases
 
 ## Editing settings per-asset:
 * In your imported asset, under Texture -> Advanced Settings -> Asset User Data you will be able to edit import settings for your texture

@@ -1,5 +1,5 @@
 # RTMSDF v1.0.0 [BETA]
-## 2D Signed Distance Field support for Unreal Engine 5
+## 2D Signed Distance Field support for Unreal Engine 5.4+
 Importers for generating 2D SDFs from .svg source files and all Unreal-supported texture source files (.psd, .png, .tif etc)
 
 Uses [MSDFGen](https://github.com/Chlumsky/msdfgen) for processing of SVG files

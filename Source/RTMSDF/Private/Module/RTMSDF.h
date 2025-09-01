@@ -2,7 +2,7 @@
 
 #pragma once
 
-DECLARE_LOG_CATEGORY_EXTERN(RTMSDF, All, All)
+DECLARE_LOG_CATEGORY_EXTERN(RTMSDF, Log, Log)
 
 class FRTMSDFModule : public IModuleInterface
 {};

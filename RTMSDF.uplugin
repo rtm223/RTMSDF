@@ -1,10 +1,10 @@
 {
 	"FileVersion": 3,
-	"Version": 0,
-	"VersionName": "0.1",
-	"FriendlyName": "SDF Tools",
+	"Version": 1,
+	"VersionName": "1.0.0",
+	"FriendlyName": "Signed Distance Fields [RTMSDF]",
 	"EditorCustomVirtualPath": "RTM",
-	"Description": "Importers for creating SDFs from .svg source files and all Unreal-supported texture source files",
+	"Description": "Importers for generating 2D SDFs from .svg source files and all Unreal-supported texture source files (.psd, .png, .tif etc).\nTools for working with SDF textures at runtime",
 	"Category": "Richard Meredith",
 	"CreatedBy": "Richard Meredith",
 	"CreatedByURL": "https://www.richardmeredith.net",
@@ -17,9 +17,14 @@
 	"Installed": false,
 	"Modules": [
 		{
+			"Name": "RTMSDF",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
 			"Name": "RTMSDFEditor",
 			"Type": "Editor",
-			"LoadingPhase": "PreDefault"
+			"LoadingPhase": "Default"
 		},
 		{
 			"Name": "ChlumskyMSDFGen",

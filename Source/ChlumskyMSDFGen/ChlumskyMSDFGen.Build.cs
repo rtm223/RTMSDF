@@ -1,21 +1,22 @@
 // Copyright (c) Richard Meredith AB. All Rights Reserved
 
-using System.IO;
 using UnrealBuildTool;
+using EpicGames.Core;
+using UnrealBuildBase;
 
 public class ChlumskyMSDFGen : ModuleRules
 {
 	public ChlumskyMSDFGen(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-		CppStandard = CppStandardVersion.Cpp17;
+		CppStandard = CppStandardVersion.Latest;
+		bUseUnity = true;
 
 		PublicDependencyModuleNames.Add("Core");
 
 		PrivateIncludePaths.AddRange(
 			new string[]
 			{
-				"ChlumskyMSDFGen/Public/Freetype/include/",
 				"ChlumskyMSDFGen/Public/Core/",
 				"ChlumskyMSDFGen/Public/Ext/",
 			});
@@ -24,17 +25,27 @@ public class ChlumskyMSDFGen : ModuleRules
 			new string[]
 			{
 				"MSDFGEN_USE_CPP11",
-				"_CRT_SECURE_NO_WARNINGS"
+				"_CRT_SECURE_NO_WARNINGS",
+				"MSDFGEN_USE_DROPXML",
+				"M_PI=3.14159265358979323846"
 			});
 
-		if (UnrealTargetPlatform.Win64 == Target.Platform)
-			PrivateDefinitions.Add("MSDFGEN_USE_CRT_SECURE");
+		// SKIA only available on windows for now
+		if(Target.Platform == UnrealTargetPlatform.Win64)
+			PrivateDefinitions.Add("MSDFGEN_USE_SKIA");
 
-		var freetypeLibPath = Path.Combine(ModuleDirectory, "Public", "Freetype");
-		if (UnrealTargetPlatform.Win64 == Target.Platform || UnrealTargetPlatform.Linux == Target.Platform ||
-		    UnrealTargetPlatform.Mac == Target.Platform)
-			PublicAdditionalLibraries.Add(Path.Combine(freetypeLibPath, "win64", "freetype.lib"));
+		/* Tests for MSDF and SKIA in source.
+		 * Currently we can't do much about this, as the source versions are included via cpp and not distributed with launcher builds, so we maintain our own versions */
+		FileReference msdfSourcePath = FileReference.Combine(Unreal.RootDirectory, "Engine", "Source", "ThirdParty", "msdfgen", "msdfgen.h");
+		if (FileReference.Exists(msdfSourcePath))
+			PublicDefinitions.Add("WITH_MSDF_SOURCE=1");
+		else
+			PublicDefinitions.Add("WITH_MSDF_SOURCE=0");
 
-		bUseUnity = false;
+		FileReference skiaSourcePath = FileReference.Combine(Unreal.RootDirectory, "Engine", "Source", "ThirdParty", "skia", "skia-simplify.h");
+		if (FileReference.Exists(skiaSourcePath))
+			PublicDefinitions.Add("WITH_SKIA_SOURCE=1");
+		else
+			PublicDefinitions.Add("WITH_SKIA_SOURCE=0");
 	}
 }

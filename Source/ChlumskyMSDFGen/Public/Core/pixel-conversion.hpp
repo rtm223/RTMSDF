@@ -5,10 +5,8 @@
 
 namespace msdfgen {
 
-typedef unsigned char byte;
-
 inline byte pixelFloatToByte(float x) {
-    return byte(clamp(256.f*x, 255.f));
+    return byte(clamp(255.f*x, 255.f));
 }
 
 inline float pixelByteToFloat(byte x) {

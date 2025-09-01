@@ -3,7 +3,7 @@
 #include "RTMSDFEditor.h"
 #include "ISettingsModule.h"
 #include "ISettingsSection.h"
-#include "Config/RTMSDFConfig.h"
+#include "Settings/RTMSDF_ProjectSettings.h"
 #include "DetailsCustomization/RTMSDF_SettingsStructCustomization.h"
 #include "ThumbnailRendering/ThumbnailManager.h"
 #include "Thumbnails/RTMSDF_ThumbnailRenderer.h"
@@ -13,7 +13,7 @@ DEFINE_LOG_CATEGORY(RTMSDFEditor);
 
 IMPLEMENT_MODULE(FRTMSDFEditorModule, RTMSDFEditor)
 
-namespace RTMSDF
+namespace RTM::SDF::EditorModuleStatics
 {
 	// Copied across from RTMCommonEditor, RTMDetailsCustomizationHelpers
 
@@ -31,20 +31,21 @@ namespace RTMSDF
 
 void FRTMSDFEditorModule::StartupModule()
 {
+	using namespace RTM::SDF::EditorModuleStatics;
 	if(auto* settingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
 	{
 		ISettingsSectionPtr settingsSection = settingsModule->RegisterSettings("Project", "Plugins", "RTM SDF",
 			LOCTEXT("SettingsName", "RTM SDF"),
 			LOCTEXT("SettingsDescription", "Configure Defaults for newly imported .svg to SDF Textures"),
-			GetMutableDefault<URTMSDFConfig>());
+			GetMutableDefault<URTMSDF_ProjectSettings>());
 	}
 
 	auto& tnManager = UThumbnailManager::Get();
 	tnManager.UnregisterCustomRenderer(UTexture2D::StaticClass());
 	tnManager.RegisterCustomRenderer(UTexture2D::StaticClass(), URTMSDF_ThumbnailRenderer::StaticClass());
 
-	RTMSDF::RegisterStructDetailsCustomization<FRTMSDF_SettingsStructCustomization, FRTMSDF_SVGImportSettings>();
-	RTMSDF::RegisterStructDetailsCustomization<FRTMSDF_SettingsStructCustomization, FRTMSDF_BitmapImportSettings>();
+	RegisterStructDetailsCustomization<FRTMSDF_SettingsStructCustomization, FRTMSDF_SVGGenerationSettings>();
+	RegisterStructDetailsCustomization<FRTMSDF_SettingsStructCustomization, FRTMSDF_BitmapGenerationSettings>();
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -7,14 +7,16 @@ public class RTMSDFEditor : ModuleRules
 	public RTMSDFEditor(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-		CppStandard = CppStandardVersion.Cpp17;
+		CppStandard = CppStandardVersion.Latest;
 
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
 				"Core",
 				"CoreUObject",
+				"ChlumskyMSDFGen",
 				"Engine",
+				"EditorSubsystem",
 			});
 
 		PrivateDependencyModuleNames.AddRange(
@@ -22,8 +24,9 @@ public class RTMSDFEditor : ModuleRules
 			{
 				"UnrealEd",
 				"RHI",
-				"ChlumskyMSDFGen",
 				"PropertyEditor",
+				"RTMSDF",
+				"InterchangeCore",
 			});
 	}
 }

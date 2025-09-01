@@ -7,8 +7,9 @@ public class RTMSDF : ModuleRules
 	public RTMSDF(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-		CppStandard = CppStandardVersion.Cpp17;
+		CppStandard = CppStandardVersion.Latest;
 
+		bUseUnity = false;
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{

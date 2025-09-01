@@ -3,14 +3,15 @@
 #include "RTMSDF_ThumbnailRenderer.h"
 #include "CanvasItem.h"
 #include "CanvasTypes.h"
-#include "Importer/Bitmap/RTMSDF_BitmapImportAssetData.h"
-#include "Importer/SVG/RTMSDF_SVGImportAssetData.h"
+#include "Settings/RTMSDF_ProjectSettings.h"
+#include "Generation/Bitmap/RTMSDF_BitmapGenerationAssetData.h"
+#include "Generation/SVG/RTMSDF_SVGGenerationAssetData.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "ThumbnailRendering/ThumbnailManager.h"
 
 URTMSDF_ThumbnailRenderer::URTMSDF_ThumbnailRenderer()
 {
-	SDFThumbnailMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/RTMSDF/Editor/M_RTMSDF_Thumbnail"), nullptr);
+	//SDFThumbnailMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/RTMSDF/Editor/M_RTMSDF_Thumbnail"), nullptr);
 
 	// TODO - this should be using a UMaterialInstanceConstant with static switch parameters here, but I couldn't work out how to
 }
@@ -18,17 +19,6 @@ URTMSDF_ThumbnailRenderer::URTMSDF_ThumbnailRenderer()
 void URTMSDF_ThumbnailRenderer::PostInitProperties()
 {
 	Super::PostInitProperties();
-
-	// Get that to work, so it seems easier to have materialInstances in assets and read them in. Not ideal, but nvm
-	//		auto materialInstance = NewObject<UMaterialInstanceConstant>(GetTransientPackage());
-	//		materialInstance->SetParentEditorOnly(SDFThumbnailMaterial);
-	//		// Set Static Switches 
-	//		materialInstance->UpdateStaticPermutation(); // maybe
-	//	Do all of these permutations on demand and cache them (or in the constructor TBH)
-	SDFThumbnailMSDF = UMaterialInstanceDynamic::Create(LoadObject<UMaterialInterface>(nullptr, TEXT("/RTMSDF/Editor/MI_RTMSDF_Thumbnail_MSDF"), nullptr), this);
-	SDFThumbnailBitmapRGBA = UMaterialInstanceDynamic::Create(LoadObject<UMaterialInterface>(nullptr, TEXT("/RTMSDF/Editor/MI_RTMSDF_Thumbnail_Bitmap_RGBA"), nullptr), this);
-	SDFThumbnailBitmapRGBAPreserveRGB = UMaterialInstanceDynamic::Create(LoadObject<UMaterialInterface>(nullptr, TEXT("/RTMSDF/Editor/MI_RTMSDF_Thumbnail_Bitmap_RGBA_PreserveRGB"), nullptr), this);
-	SDFThumbnailBitmapG = UMaterialInstanceDynamic::Create(LoadObject<UMaterialInterface>(nullptr, TEXT("/RTMSDF/Editor/MI_RTMSDF_Thumbnail_Bitmap_G"), nullptr), this);
 }
 
 void URTMSDF_ThumbnailRenderer::GetThumbnailSize(UObject* object, float zoom, uint32& outWidth, uint32& outHeight) const
@@ -39,60 +29,80 @@ void URTMSDF_ThumbnailRenderer::GetThumbnailSize(UObject* object, float zoom, ui
 
 void URTMSDF_ThumbnailRenderer::Draw(UObject* object, int32 x, int32 y, uint32 width, uint32 height, FRenderTarget* viewport, FCanvas* canvas, bool bAdditionalViewFamily)
 {
+	const auto* config = GetDefault<URTMSDF_ProjectSettings>();
+
 	if(auto* texture = Cast<UTexture2D>(object))
 	{
-		UMaterialInstanceDynamic* materialInstanceDynamic = nullptr;
-		FString label;
+		FLinearColor sdfChannelMask(1,1,1,1);
+		UMaterialInterface* material = nullptr;
+		FString label = TEXT("SDF");
 		bool isRGBA = texture->CompressionSettings == TC_EditorIcon;
-		
-		if(const auto* importData = texture->GetAssetUserData<URTMSDF_BitmapImportAssetData>())
+		bool invertSDF = false;
+		if(const auto* importData = texture->GetAssetUserData<URTMSDF_BitmapGenerationAssetData>())
 		{
+			invertSDF = importData->GenerationSettings.bInvertDistance;
+
 			if(isRGBA)
 			{
-				if(importData->ImportSettings.RGBAMode == ERTMSDF_RGBAMode::PreserveRGB)
-					materialInstanceDynamic = SDFThumbnailBitmapRGBAPreserveRGB;
+				if(importData->GenerationSettings.LooksLikePreserveRGB())
+				{
+					material = config->SDFThumbnailPreserveRGB_Inst;
+					sdfChannelMask = FLinearColor(0,0,0,1);
+				}
 				else
-					materialInstanceDynamic = SDFThumbnailBitmapRGBA;
+				{
+					material = config->SDFThumbnailMultichannel_Inst;
+					sdfChannelMask = FLinearColor(
+						importData->GenerationSettings.GetChannelBehavior(ERTMSDF_Channels::Red) == ERTMSDF_BitmapChannelBehavior::SDF ? 1.0f : 0.0f,
+						importData->GenerationSettings.GetChannelBehavior(ERTMSDF_Channels::Green) == ERTMSDF_BitmapChannelBehavior::SDF ? 1.0f : 0.0f,
+						importData->GenerationSettings.GetChannelBehavior(ERTMSDF_Channels::Blue) == ERTMSDF_BitmapChannelBehavior::SDF ? 1.0f : 0.0f,
+						importData->GenerationSettings.GetChannelBehavior(ERTMSDF_Channels::Alpha) == ERTMSDF_BitmapChannelBehavior::SDF ? 1.0f : 0.0f
+					);
+				}
 			}
 			else
 			{
-				materialInstanceDynamic = SDFThumbnailBitmapG;
+				material = config->SDFThumbnailSingleChannel_Inst;
 			}
-			label = TEXT("SDF");
 		}
-		if(texture->GetAssetUserData<URTMSDF_SVGImportAssetData>())
+		if(const auto* importData = texture->GetAssetUserData<URTMSDF_SVGGenerationAssetData>())
 		{
-			materialInstanceDynamic = isRGBA ?  SDFThumbnailMSDF : SDFThumbnailBitmapG;
+			invertSDF = importData->GenerationSettings.bInvertDistance;
+			material = isRGBA ?  config->SDFThumbnailMSDF_Inst : config->SDFThumbnailSingleChannel_Inst;
 			label = isRGBA ? TEXT("MSDF") : TEXT("SDF");
 		}
-		
-		if(materialInstanceDynamic)
+
+		if(material)
 		{
 			constexpr int32 checkerDensity = 8;
 			auto& checker = UThumbnailManager::Get().CheckerboardTexture;
 			canvas->DrawTile(0.0f, 0.0f, width, height, 0.0f, 0.0f, checkerDensity, checkerDensity, FLinearColor::White, checker->GetResource());
 
-			if(isRGBA)
-				materialInstanceDynamic->SetTextureParameterValue(ParamRGBATexture, texture);
-			else
-				materialInstanceDynamic->SetTextureParameterValue(ParamGrayscaleTexture, texture);
-
+			// TODO - maybe these should be cached out somewhere rather than thrashing the objects?
+			auto* materialInstanceDynamic = UMaterialInstanceDynamic::Create(material, this);
+			materialInstanceDynamic->SetTextureParameterValue(ParamTexture, texture);
+			materialInstanceDynamic->SetScalarParameterValue(ParamInvertDistance, invertSDF ? 1.0f : 0.0f);
+			materialInstanceDynamic->SetVectorParameterValue(ParamSDFChannelMask, sdfChannelMask);
 			const auto* materialProxy = materialInstanceDynamic->GetRenderProxy();
 			FCanvasTileItem tileItem(FVector2D(x, y), materialProxy, FVector2D(width, height));
 			canvas->DrawItem(tileItem);
 
-			FIntPoint labelSize;
-			StringSize(GEngine->GetSmallFont(), labelSize.X, labelSize.Y, *label);
-			FVector2D size(width, height);
-			FVector2D padding = labelSize / 32.0f;
-			FVector2D scale = size / 64.0f;
-			FCanvasTextItem TextItem(size - padding - FVector2D(labelSize.X, labelSize.Y) * scale, FText::FromString(label), GEngine->GetSmallFont(), FLinearColor::White);
-			TextItem.bOutlined = true;
-			TextItem.Scale = scale;
-			TextItem.Draw(canvas);
-			return;
+			if(config->bLabelThumbnailsAsSDF)
+			{
+				FIntPoint labelSize;
+				StringSize(GEngine->GetSmallFont(), labelSize.X, labelSize.Y, *label);
+				FVector2D size(width, height);
+				FVector2D padding = labelSize / 5.0;
+				FVector2D scale = size / 96.0;
+				FVector2D shadowOffset(scale * 1.5);
+				FCanvasTextItem TextItem(size - padding - FVector2D(labelSize.X, labelSize.Y) * scale, FText::FromString(label), GEngine->GetSmallFont(), FLinearColor::White*2.0f);
+				TextItem.bOutlined = true;
+				TextItem.EnableShadow(FLinearColor(0.04f, 0.04f, 0.04f, 1.0f), shadowOffset);
+				TextItem.Scale = scale;
+				TextItem.Draw(canvas);
+				return;
+			}
 		}
 	}
-
 	Super::Draw(object, x, y, width, height, viewport, canvas, bAdditionalViewFamily);
 }

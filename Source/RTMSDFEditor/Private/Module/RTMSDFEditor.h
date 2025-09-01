@@ -2,7 +2,7 @@
 
 #pragma once
 
-DECLARE_LOG_CATEGORY_EXTERN(RTMSDFEditor, All, All)
+DECLARE_LOG_CATEGORY_EXTERN(RTMSDFEditor, Log, Log)
 
 class FRTMSDFEditorModule : public IModuleInterface
 {

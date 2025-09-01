@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "../core/Shape.h"
+#include "Core/Shape.h"
 
 #ifdef MSDFGEN_USE_SKIA
 

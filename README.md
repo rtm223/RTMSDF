@@ -1,9 +1,8 @@
-# RTMSDF
-## Unreal Engine 5 2D Signed Distance Field support
+# RTMSDF v1.0.0 [BETA]
+## 2D Signed Distance Field support for Unreal Engine 5
 Importers for generating 2D SDFs from .svg source files and all Unreal-supported texture source files (.psd, .png, .tif etc)
 
 Uses [MSDFGen](https://github.com/Chlumsky/msdfgen) for processing of SVG files
-
 
 ## Quick Start
 1. Clone this repository into MyUE4Project/Plugins/RTMSDF or MYUE4Project/Plugins/RTM/RTMSDF
@@ -19,6 +18,23 @@ Uses [MSDFGen](https://github.com/Chlumsky/msdfgen) for processing of SVG files
     * Bitmap Default Import Settings are for importing bitmaps and can be overridden for individual files. There is a version for single channel source files and multichannel source files
 4. Create an svg, png or other image file with the approriate naming and import it to unreal
 
+## New for version 1.0.0
+### Bitmap Importing
+* Interchange Support (plus legacy support for projects not using Interchange)
+* 4-50x speed increase on importing
+* Low level API for runtime importing
+* Support for wrapped / tiling SDFs
+
+### SVG Importing
+* Support for multiple shapes, different kinds of SVG shapes, overlapping shapes
+
+### All SDFs
+* Automatic rescaling of textures to fit distance field (no need to author assets with margins)
+* Support for non-square SDFs
+* Blueprint library to query SDF features (distance field range, source asset size, at runtime)
+* [Untested] Support for Linux / Mac (though with limitations on SVGs, ee below)
+* Much nicer thumbnails
+
 ## Editing settings per-asset:
 * In your imported asset, under Texture -> Advanced Settings -> Asset User Data you will be able to edit import settings for your texture
 * These are identical to the settings in the project settings
@@ -29,11 +45,3 @@ Uses [MSDFGen](https://github.com/Chlumsky/msdfgen) for processing of SVG files
 ## SVG Import Limitations
 * MSDF uses skia to help parse out SVG files. Currently Skia support is Windows only
 * There is a fallback parser for Mac / Linux that has not really been tested, and will likely produce worse results
-
-## Bitmap Import Limitations
-* Bitmap import will attept to detext if your source file is single channel or multichannel however
-  * However UE4 doesn't handle this well and some file types (e.g. psd) will always be rgba
-  * Change the compression settings to "Grayscale" for the texture to force a single channel SDF generation
-* Bitmaps have 2 RGBA modes
-  * Separate Channels - each channel will be trated as a separate SDF to give multiple SDFs in a single file
-  * Preserve RGB - will keep the source RGB channels and produce a sdf on the alpha channel (this does not work very well right now)

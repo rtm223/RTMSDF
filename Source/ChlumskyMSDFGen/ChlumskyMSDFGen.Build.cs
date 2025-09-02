@@ -8,9 +8,11 @@ public class ChlumskyMSDFGen : ModuleRules
 {
 	public ChlumskyMSDFGen(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+		bool testIWYU = false;
+		PCHUsage = testIWYU ? PCHUsageMode.NoPCHs : PCHUsageMode.UseExplicitOrSharedPCHs;
+		bUseUnity = !testIWYU;
+
 		CppStandard = CppStandardVersion.Latest;
-		bUseUnity = true;
 
 		PublicDependencyModuleNames.Add("Core");
 

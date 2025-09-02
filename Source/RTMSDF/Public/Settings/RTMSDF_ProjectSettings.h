@@ -6,9 +6,12 @@
 #include "Generation/Bitmap/RTMSDF_BitmapGenerationSettings.h"
 #include "Generation/SVG/RTMSDF_SVGGenerationSettings.h"
 #include "UObject/Object.h"
+#include "Engine/TextureDefines.h"
 #include "RTMSDF_ProjectSettings.generated.h"
 
+class UMaterialInterface;
 struct FPropertyChangedEvent;
+enum TextureGroup : int;
 
 UCLASS(Config=RTMSDF, DefaultConfig)
 class RTMSDF_API URTMSDF_ProjectSettings : public UObject

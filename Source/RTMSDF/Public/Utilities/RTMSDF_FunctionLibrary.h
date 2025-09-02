@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
+#include "Kismet/BlueprintFunctionLibrary.h"
 #include "RTMSDF_FunctionLibrary.generated.h"
 
 enum class ERTMSDF_SDFFormat : uint8;

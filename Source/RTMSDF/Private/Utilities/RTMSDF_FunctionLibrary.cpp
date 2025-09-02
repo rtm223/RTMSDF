@@ -1,8 +1,10 @@
 ﻿// Copyright (c) Richard Meredith AB. All Rights Reserved
 
 #include "Utilities/RTMSDF_FunctionLibrary.h"
+#include "AssetRegistry/AssetData.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetRegistry/IAssetRegistry.h"
+#include "Engine/Texture2D.h"
 #include "Generation/Bitmap/RTMSDF_BitmapGenerationAssetData.h"
 #include "Generation/Common/RTMSDF_GenerationAssetData_Base.h"
 #include "Generation/SVG/RTMSDF_SVGGenerationAssetData.h"

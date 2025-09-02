@@ -2,6 +2,8 @@
 
 #pragma once
 
+enum ETextureSourceFormat : int;
+
 namespace RTM::SDF
 {
 	struct FSDFBufferDef
@@ -9,7 +11,7 @@ namespace RTM::SDF
 		uint16 Width = 0;
 		uint16 Height = 0;
 		uint8 NumChannels = 0;
-		ETextureSourceFormat Format = TSF_Invalid;
+		ETextureSourceFormat Format = static_cast<ETextureSourceFormat>(0); // TSF_Invalid;
 
 		size_t GetBufferLen() const { return Width * Height * NumChannels; }	// todo - * type ?
 	};

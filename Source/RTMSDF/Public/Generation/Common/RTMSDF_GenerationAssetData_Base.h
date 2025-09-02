@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/AssetUserData.h"
 #include "Generation/Common/RTMSDF_CommonGenerationSettings.h"
 #include "RTMSDF_GenerationAssetData_Base.generated.h"
 

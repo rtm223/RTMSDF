@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Richard Meredith AB. All Rights Reserved
 
 #include "Settings/RTMSDF_ProjectSettings.h"
-#include "UObject/ObjectSaveContext.h"
+#include "Materials/MaterialInterface.h"
 
 URTMSDF_ProjectSettings::URTMSDF_ProjectSettings()
 {

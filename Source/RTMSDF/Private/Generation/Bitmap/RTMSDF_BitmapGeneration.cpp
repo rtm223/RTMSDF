@@ -2,8 +2,11 @@
 
 #include "Generation/Bitmap/RTMSDF_BitmapGeneration.h"
 #include "Generation/Bitmap/RTMSDF_QuadTree.h"
-#include "Module/RTMSDF.h"
 #include "Generation/Common/RTMSDF_Buffers.h"
+#include "Logging/LogMacros.h"
+#include "Misc/ScopeExit.h"
+#include "Module/RTMSDF.h"
+#include "Async/ParallelFor.h"
 
 #define TREESEARCH_THREAD_ROWS 0 // 1 to put each row of the SDF on a thread, vs each pixel
 

@@ -6,10 +6,12 @@ public class RTMSDF : ModuleRules
 {
 	public RTMSDF(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+		bool testIWYU = false;
+		PCHUsage = testIWYU ? PCHUsageMode.NoPCHs : PCHUsageMode.UseExplicitOrSharedPCHs;
+		bUseUnity = !testIWYU;
+
 		CppStandard = CppStandardVersion.Latest;
 
-		bUseUnity = false;
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
@@ -17,7 +19,5 @@ public class RTMSDF : ModuleRules
 				"CoreUObject",
 				"Engine",
 			});
-
-		PrivateDependencyModuleNames.AddRange(new string[] { });
 	}
 }

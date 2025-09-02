@@ -6,7 +6,10 @@ public class RTMSDFEditor : ModuleRules
 {
 	public RTMSDFEditor(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+		bool testIWYU = false;
+		PCHUsage = testIWYU ? PCHUsageMode.NoPCHs : PCHUsageMode.UseExplicitOrSharedPCHs;
+		bUseUnity = !testIWYU;
+
 		CppStandard = CppStandardVersion.Latest;
 
 		PublicDependencyModuleNames.AddRange(

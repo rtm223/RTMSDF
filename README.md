@@ -1,8 +1,9 @@
-# RTMSDF v1.0.0 [BETA]
-## 2D Signed Distance Field support for Unreal Engine 5.4+
-Importers for generating 2D SDFs from .svg source files and all Unreal-supported texture source files (.psd, .png, .tif etc). Uses [MSDFGen](https://github.com/Chlumsky/msdfgen) for processing of SVG files
+![RTMSDF - 2D Signed Distance Field Generators & Importers for Unreal Engine 5](Docs/Images/RTMSDF_Banner_830x300.png)
 
-See [Changelog](CHANGELOG.md) for details of what is new in version 1.0
+# RTMSDF v1.0.0 [BETA]
+Unreal Engine 5 ålugin containing importers for generating 2D SDFs from .svg source files and all Unreal-supported texture source files (.psd, .png, .tif etc). Uses [MSDFGen](https://github.com/Chlumsky/msdfgen) for processing of SVG files. Currently supports UE5.4+
+
+See [Changelog](CHANGELOG.md) for details of what is new in version 1.0.
 
 ## Quick Start
 1. Clone this repository into MyUE4Project/Plugins/RTMSDF or MYUE4Project/Plugins/RTM/RTMSDF
@@ -18,7 +19,7 @@ See [Changelog](CHANGELOG.md) for details of what is new in version 1.0
     - Bitmap Default Import Settings are for importing bitmaps and can be overridden for individual files. There is a version for single channel source files and multichannel source files
 4. Create an svg, png or other image file with the approriate naming and import it to unreal
 
-## Editing settings per-asset:
+## Editing Settings per-asset:
 - In your imported asset, under Texture -> Advanced Settings -> Asset User Data you will be able to edit import settings for your texture
 - These are identical to the settings in the project settings
 - Changing a setting *will not* automatically update the texture - you must click `Reimport` to see any changes

@@ -3,6 +3,7 @@ Version numbering as [**Major** . **Minor** . **Patch**]
 - **Major** : Significant changes that may break backwards compatibility
 - **Minor** : Additional features and changes that should not break compatibility outside of minor deprecations
 - **Patch** : Bug fixes, minor edits that do not change behaviour
+
 ## [1.0.0] Initial Release [BETA]
 ### Added
 #### Bitmap Importing

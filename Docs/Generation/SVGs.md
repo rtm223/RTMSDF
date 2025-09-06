@@ -1,5 +1,13 @@
 # Importing SDFs from SVGs
 > TODO 
+
+### SVG Generation Limitations
+> TODO: Maybe move this?
+- MSDF (and therefore SVG support) is only available in-editor
+- MSDF uses skia to help parse out SVG files. Currently Skia support is Windows only
+- There is a fallback parser for Mac / Linux
+  - This has not really been tested
+  - It will likely produce inconsistent (and worse) results
 ## MSDF Overview
 > TODO 
 ## Source Formats

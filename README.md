@@ -1,37 +1,57 @@
 ![RTMSDF - 2D Signed Distance Field Generators & Importers for Unreal Engine 5](Docs/Images/RTMSDF_Banner_830x300.png)
 
-# RTMSDF v1.0.0 [BETA]
-Unreal Engine 5 Plugin containing importers for generating 2D SDFs from .svg source files and all Unreal-supported texture source files (.psd, .png, .tif etc). Uses [MSDFGen](https://github.com/Chlumsky/msdfgen) for processing of SVG files. Currently supports UE5.4+
+# RTMSDF v1.0.0
+Unreal Engine 5 Plugin containing importers for generating 2D SDFs from .svg source files 
+and all Unreal-supported texture source files (.psd, .png, .tif etc). Uses 
+[MSDFGen](https://github.com/Chlumsky/msdfgen) for processing of SVG files. 
+Currently supports UE5.4+
 
 See [Changelog](CHANGELOG.md) for details of what is new in version 1.0.
 
+## Downloading from GitHub
+Either clone this repository or download one of the pre-built binary releases and add it
+to either `{Project}/Plugins/RTMSDF/` or `{Engine}/Plugins/RTMSDF/` directory
+
+> Note: the repository does not have binaries included, so you will need to build them 
+yourself in a cpp project. Blueprint only projects will need to take the latest version
+ from releases
+
 ## Quick Start
-1. Clone this repository into MyUE4Project/Plugins/RTMSDF or MYUE4Project/Plugins/RTM/RTMSDF
-2. Compile for Editor as usual and launch
-3. Open Project Settings > Engine > Interchange > Import Content > Content Import Settings > Pipeline Stacks > Texture
-    - Add a new entry, after `DefaultTexturePipeline`, select `Interchange_RTMSDF_BitmapPipeline`.
-    - If you cannot see the `Interchange_RTMSDF_BitmapPipeline` asset in the dropdown, make sure your filters allow you to see plugin content
-    - Note that these settings are per-user so for other team members to use the importers you'll need to click Set As Default in the top right of the screen
-5. Check Project Settings -> Plugins -> RTM SDF for the important settings
-    - SVG Filename Suffix - .svg source files with this suffix will be imported and converted to MSDF, i.e. `T_MyFancyIcon_SDF.svg`
-    - Bitmap Filename Suffix - bitmap files (.png, .psd, .bmp etc.) with this suffix will be imported and converted to SDF files, i.e. `T_MyLessFancyIcons_SDF.psd`
-    - SVG Import settings are related to MSDFGen - see [MSDFGen](https://github.com/Chlumsky/msdfgen) for details - can be overridden for individual files
-    - Bitmap Default Import Settings are for importing bitmaps and can be overridden for individual files. There is a version for single channel source files and multichannel source files
-4. Create an svg, png or other image file with the approriate naming and import it to unreal
+### 1. Enable the Plugin
+Enable the plugin, either by manually adding it to your `.uproject` file, or in editor via the Plugins window:
+1. Choose `Edit > Plugins` from the top menu bar
+2. Find the plugin called "Signed Distance Fields [RTMSDF]` or search "RTMSDF"
+3. Check the box to the left of the icon
+4. Restart the editor
 
-## Editing Settings per-asset:
-- In your imported asset, under Texture -> Advanced Settings -> Asset User Data you will be able to edit import settings for your texture
-- These are identical to the settings in the project settings
-- Changing a setting *will not* automatically update the texture - you must click `Reimport` to see any changes
-- The SDF import process will force your `TextureCompression` settings
-     - This is fine, you want uncompressed data for SDFs and it will select between single/ multichannel appropriately 
-- By default Unreal does not differentiate between single channel PSDs and multichannel PSDs
-  - PSD source files are assumed to be single channel
-  - If you wish to use multiple channels from a PSD source file, update the `Format` setting after first import
+![](Docs/Images/Configure_EnablePlugin.png)
 
-## SVG Generation Limitations
-- MSDF (and therefore SVG support) is only available in-editor
-- MSDF uses skia to help parse out SVG files. Currently Skia support is Windows only
-- There is a fallback parser for Mac / Linux
-  - This has not really been tested
-  - It will likely produce inconsistent (and worse) results
+### 2. Configure Interchange
+Configure Interchange to be aware of the RTMSDF importers
+1. Choose `Edit > Project Settings` from the top menu bar
+2. Find `Engine > Interchange` in the side bar (do NOT search for it)
+3. Under `Import Content > Content Import Settings > Pipeline Stacks` find `Textures` and add a new element to the `Pipelines` array
+4. Select `Interchange_RTMSDF_BitmapPipeline`. 
+    - If you cannot see it it the drop down, check the plugin is enabled and that you have `Show Plugin Content` checked in the Asset Picker ⚙️Settings 
+5. Click `Set as Default`in the top right of the window. 
+   - If you can't see this button, check that you found the Interchange via the side bar and not by searching
+
+![](Docs/Images/Configure_Interchange.png)
+
+> NOTE: Interchange settings are per-user, so if you are working on a team it is important to `Set as Defaults` and commit the `DefaultEngine.ini` file to VCS
+
+### 3. Import Your First SDF
+Start by trying to import one of the example assets
+1. Navigate to the folder with `RTMSDF.uplugin` in
+2. Find the `SourceAssets/Examples/Textures/` subdirectory
+3. Drag one of the .png files and one of the .svg files into your content browser
+4. The thumbnails should look similar to the ones below (orange/purple, with "SDF" or "MSDF" in the corner)
+    - If they don't show up like that, double check the Plugin and interchange settings, or contact me via [Bluesky](https://bsky.app/profile/rtm223.me), [Mastodon](https://mastodon.gamedev.place/@rtm223) or [email](mailto:hello@richardmeredith.net)
+    - Hopefully there will be a troubleshooting guide available soon
+
+![](Docs/Images/Configure_FirstImport.png)
+
+## Further Reading
+Check out the [Docs](Docs/Index.md) for more info. Recommended next steps are
+  - [Generation](Docs/Generation/Index.md) - to find out more about generating SDFs and import optios
+  - [Examples](Docs/Examples/Index.md) to see how you can use SDFs in your projects

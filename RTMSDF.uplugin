@@ -2,6 +2,7 @@
 	"FileVersion": 3,
 	"Version": 1,
 	"VersionName": "1.0.0",
+	"EnabledByDefault": false,
 	"FriendlyName": "Signed Distance Fields [RTMSDF]",
 	"EditorCustomVirtualPath": "RTM",
 	"Description": "Importers for generating 2D SDFs from .svg source files and all Unreal-supported texture source files (.psd, .png, .tif etc).\nTools for working with SDF textures at runtime",

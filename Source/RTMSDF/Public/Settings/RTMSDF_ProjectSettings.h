@@ -9,8 +9,6 @@
 #include "Engine/TextureDefines.h"
 #include "RTMSDF_ProjectSettings.generated.h"
 
-class UMaterialInterface;
-struct FPropertyChangedEvent;
 enum TextureGroup : int;
 
 UCLASS(Config=RTMSDF, DefaultConfig)
@@ -45,45 +43,6 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category="Bitmap Default Import Settings|Multi Channel", meta=(FullyExpand=true, DisplayName = "Default Bitmap Import Settings (multi channel)"))
 	FRTMSDF_BitmapGenerationSettings DefaultBitmapImportSettings_MultiChannel;
 
-	// Material to be used for SDFs with a single channel
-	UPROPERTY(Config, EditAnywhere, Category="Thumbnails", meta=(DisplayName="Single Channel Material"))
-	TSoftObjectPtr<UMaterialInterface> SDFThumbnailSingleChannel = nullptr;
-
-	// Material to be used for MSDFs
-	UPROPERTY(Config, EditAnywhere, Category="Thumbnails", meta=(DisplayName="MSDF Material"))
-	TSoftObjectPtr<UMaterialInterface> SDFThumbnailMSDF = nullptr;
-
-	// Material to be used for SDFs with multiple channels (i.e. with separate SDFs packed into RGBA)
-	UPROPERTY(Config, EditAnywhere, Category="Thumbnails", meta=(DisplayName="Multichannel Material"))
-	TSoftObjectPtr<UMaterialInterface> SDFThumbnailMultichannel = nullptr;
-
-	// Material to be used for textures that have SDF baked into the alpha channel, but RGB channels hold original color data)
-	UPROPERTY(Config, EditAnywhere, Category="Thumbnails", meta=(DisplayName="Preserve RGB Material"))
-	TSoftObjectPtr<UMaterialInterface> SDFThumbnailPreserveRGB = nullptr;
-
-	UPROPERTY(Config, EditAnywhere, Category="Thumbnails")
-	bool bLabelThumbnailsAsSDF = true;
-
-#if WITH_EDITORONLY_DATA
-	UPROPERTY(Transient)
-	TObjectPtr<UMaterialInterface> SDFThumbnailSingleChannel_Inst = nullptr;
-
-	UPROPERTY(Transient)
-	TObjectPtr<UMaterialInterface> SDFThumbnailMSDF_Inst = nullptr;
-
-	UPROPERTY(Transient)
-	TObjectPtr<UMaterialInterface> SDFThumbnailMultichannel_Inst = nullptr;
-
-	UPROPERTY(Transient)
-	TObjectPtr<UMaterialInterface> SDFThumbnailPreserveRGB_Inst = nullptr;
-#endif
-
 protected:
 	virtual void PostInitProperties() override;
-
-#if WITH_EDITOR
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& propertyChangedEvent) override;
-	void LoadMaterials();
-#endif
-
 };

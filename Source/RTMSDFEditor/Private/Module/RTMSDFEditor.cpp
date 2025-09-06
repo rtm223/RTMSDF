@@ -3,8 +3,9 @@
 #include "RTMSDFEditor.h"
 #include "ISettingsModule.h"
 #include "ISettingsSection.h"
-#include "Settings/RTMSDF_ProjectSettings.h"
 #include "DetailsCustomization/RTMSDF_SettingsStructCustomization.h"
+#include "Settings/RTMSDF_PerUserEditorSettings.h"
+#include "Settings/RTMSDF_ProjectSettings.h"
 #include "ThumbnailRendering/ThumbnailManager.h"
 #include "Thumbnails/RTMSDF_ThumbnailRenderer.h"
 
@@ -34,10 +35,24 @@ void FRTMSDFEditorModule::StartupModule()
 	using namespace RTM::SDF::EditorModuleStatics;
 	if(auto* settingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
 	{
-		ISettingsSectionPtr settingsSection = settingsModule->RegisterSettings("Project", "Plugins", "RTM SDF",
-			LOCTEXT("SettingsName", "RTM SDF"),
+		ISettingsSectionPtr settingsSection = settingsModule->RegisterSettings("Project", "Plugins", "RTMSDF",
+			LOCTEXT("SettingsName", "RTMSDF"),
 			LOCTEXT("SettingsDescription", "Configure Defaults for newly imported .svg to SDF Textures"),
 			GetMutableDefault<URTMSDF_ProjectSettings>());
+
+		auto* editorSettings =GetMutableDefault<URTMSDF_PerUserEditorSettings>();
+		// TODO - reinvestigate if we can get per user settings working by manually iterating through the GPluginLayers
+		// NOTE: The code here successfully loads from the plugin per-user settings, but actually needs to walk the hierarchy to work properly
+		// const FString pluginDir = FPaths::ConvertRelativePathToFull(*IPluginManager::Get().FindPlugin(UE_PLUGIN_NAME)->GetBaseDir());
+		// 	const FString iniPath = FPaths::Combine(pluginDir, TEXT("Config"), TEXT("DefaultEditorPerProjectUserSettings.ini"));
+		// 	editorSettings->LoadConfig(nullptr, *iniPath);
+		// for(int i=0; i<UE_ARRAY_COUNT(GPluginLayers);++i)
+		// {
+		// }
+		ISettingsSectionPtr editorSettingsSection = settingsModule->RegisterSettings("Editor", "Plugins", "RTMSDF",
+			LOCTEXT("EditorSettingsName", "RTMSDF Editor Settings"),
+			LOCTEXT("EditorSettingsDescription", "Setup editor behaviour for RTMSDF Plugin"),
+			editorSettings);
 	}
 
 	auto& tnManager = UThumbnailManager::Get();

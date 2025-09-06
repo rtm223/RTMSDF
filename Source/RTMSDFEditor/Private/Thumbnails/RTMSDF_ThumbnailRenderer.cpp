@@ -3,10 +3,10 @@
 #include "RTMSDF_ThumbnailRenderer.h"
 #include "CanvasItem.h"
 #include "CanvasTypes.h"
-#include "Settings/RTMSDF_ProjectSettings.h"
 #include "Generation/Bitmap/RTMSDF_BitmapGenerationAssetData.h"
 #include "Generation/SVG/RTMSDF_SVGGenerationAssetData.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Settings/RTMSDF_PerUserEditorSettings.h"
 #include "ThumbnailRendering/ThumbnailManager.h"
 
 URTMSDF_ThumbnailRenderer::URTMSDF_ThumbnailRenderer()
@@ -29,7 +29,7 @@ void URTMSDF_ThumbnailRenderer::GetThumbnailSize(UObject* object, float zoom, ui
 
 void URTMSDF_ThumbnailRenderer::Draw(UObject* object, int32 x, int32 y, uint32 width, uint32 height, FRenderTarget* viewport, FCanvas* canvas, bool bAdditionalViewFamily)
 {
-	const auto* config = GetDefault<URTMSDF_ProjectSettings>();
+	const auto* settings = GetDefault<URTMSDF_PerUserEditorSettings>();
 
 	if(auto* texture = Cast<UTexture2D>(object))
 	{
@@ -46,12 +46,12 @@ void URTMSDF_ThumbnailRenderer::Draw(UObject* object, int32 x, int32 y, uint32 w
 			{
 				if(importData->GenerationSettings.LooksLikePreserveRGB())
 				{
-					material = config->SDFThumbnailPreserveRGB_Inst;
+					material = settings->SDFThumbnailPreserveRGB_Inst;
 					sdfChannelMask = FLinearColor(0,0,0,1);
 				}
 				else
 				{
-					material = config->SDFThumbnailMultichannel_Inst;
+					material = settings->SDFThumbnailMultichannel_Inst;
 					sdfChannelMask = FLinearColor(
 						importData->GenerationSettings.GetChannelBehavior(ERTMSDF_Channels::Red) == ERTMSDF_BitmapChannelBehavior::SDF ? 1.0f : 0.0f,
 						importData->GenerationSettings.GetChannelBehavior(ERTMSDF_Channels::Green) == ERTMSDF_BitmapChannelBehavior::SDF ? 1.0f : 0.0f,
@@ -62,13 +62,13 @@ void URTMSDF_ThumbnailRenderer::Draw(UObject* object, int32 x, int32 y, uint32 w
 			}
 			else
 			{
-				material = config->SDFThumbnailSingleChannel_Inst;
+				material = settings->SDFThumbnailSingleChannel_Inst;
 			}
 		}
 		if(const auto* importData = texture->GetAssetUserData<URTMSDF_SVGGenerationAssetData>())
 		{
 			invertSDF = importData->GenerationSettings.bInvertDistance;
-			material = isRGBA ?  config->SDFThumbnailMSDF_Inst : config->SDFThumbnailSingleChannel_Inst;
+			material = isRGBA ?  settings->SDFThumbnailMSDF_Inst : settings->SDFThumbnailSingleChannel_Inst;
 			label = isRGBA ? TEXT("MSDF") : TEXT("SDF");
 		}
 
@@ -87,7 +87,7 @@ void URTMSDF_ThumbnailRenderer::Draw(UObject* object, int32 x, int32 y, uint32 w
 			FCanvasTileItem tileItem(FVector2D(x, y), materialProxy, FVector2D(width, height));
 			canvas->DrawItem(tileItem);
 
-			if(config->bLabelThumbnailsAsSDF)
+			if(settings->bLabelThumbnailsAsSDF)
 			{
 				FIntPoint labelSize;
 				StringSize(GEngine->GetSmallFont(), labelSize.X, labelSize.Y, *label);

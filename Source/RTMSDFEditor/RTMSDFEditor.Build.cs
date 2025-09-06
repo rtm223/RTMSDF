@@ -28,8 +28,8 @@ public class RTMSDFEditor : ModuleRules
 				"UnrealEd",
 				"RHI",
 				"PropertyEditor",
-				"RTMSDF",
 				"InterchangeCore",
+				"RTMSDF",
 			});
 	}
 }

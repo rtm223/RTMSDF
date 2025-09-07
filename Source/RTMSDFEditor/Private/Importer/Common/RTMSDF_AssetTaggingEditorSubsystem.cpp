@@ -21,7 +21,6 @@ namespace RTM::SDF::AssetTaggingEditorSubsystemStatics
 	{
 		using namespace RTM::SDF::AssetTags;
 		const auto& settings = assetData->GetGenerationSettings();
-		outTags.Add({IsSDFTag, TEXT("True"), UObject::FAssetRegistryTag::TT_Hidden});
 		outTags.Add({SDFFormatTag, GetEnumNameString(settings.GetFormat()), UObject::FAssetRegistryTag::TT_Numerical});
 		outTags.Add({UVRangeTag, FString::Printf(TEXT("%f"), assetData->UVRange), UObject::FAssetRegistryTag::TT_Numerical});
 		outTags.Add({SourceWidthTag, FString::FromInt(assetData->SourceDimensions.X), UObject::FAssetRegistryTag::TT_Numerical});
@@ -56,7 +55,6 @@ void URTMSDF_AssetTaggingEditorSubsystem::Initialize(FSubsystemCollectionBase& C
 			}
 			else
 			{
-				assetSS->RemoveMetadataTag(createdObject, IsSDFTag);
 				assetSS->RemoveMetadataTag(createdObject, SDFFormatTag);
 				assetSS->RemoveMetadataTag(createdObject, UVRangeTag);
 				assetSS->RemoveMetadataTag(createdObject, SourceWidthTag);

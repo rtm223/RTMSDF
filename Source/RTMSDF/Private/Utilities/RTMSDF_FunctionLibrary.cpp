@@ -87,8 +87,7 @@ float URTMSDF_FunctionLibrary::GetSDFUVRange(const UTexture2D* texture)
 
 bool URTMSDF_FunctionLibrary::IsSDFSoftTexture(const TSoftObjectPtr<UTexture2D>& softTexture)
 {
-	using namespace RTM::SDF;
-	return FunctionLibraryStatics::HasAssetTag(softTexture, AssetTags::IsSDFTag);
+	return GetSDFFormatFromSoftTexture(softTexture) != ERTMSDF_SDFFormat::Invalid;
 }
 
 ERTMSDF_SDFFormat URTMSDF_FunctionLibrary::GetSDFFormatFromSoftTexture(const TSoftObjectPtr<UTexture2D>& softTexture)

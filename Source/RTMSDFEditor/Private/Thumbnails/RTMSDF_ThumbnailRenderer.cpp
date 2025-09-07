@@ -33,21 +33,23 @@ void URTMSDF_ThumbnailRenderer::Draw(UObject* object, int32 x, int32 y, uint32 w
 
 	if(auto* texture = Cast<UTexture2D>(object))
 	{
-		FLinearColor sdfChannelMask(1,1,1,1);
+		const FLinearColor thumbnailDimensions(x, y, width, height);
+		FLinearColor sdfChannelMask(1, 1, 1, 1);
 		UMaterialInterface* material = nullptr;
 		FString label = TEXT("SDF");
 		bool isRGBA = texture->CompressionSettings == TC_EditorIcon;
 		bool invertSDF = false;
+		float uvRange = 0;
 		if(const auto* importData = texture->GetAssetUserData<URTMSDF_BitmapGenerationAssetData>())
 		{
 			invertSDF = importData->GenerationSettings.bInvertDistance;
-
+			uvRange = importData->UVRange;
 			if(isRGBA)
 			{
 				if(importData->GenerationSettings.LooksLikePreserveRGB())
 				{
 					material = settings->SDFThumbnailPreserveRGB_Inst;
-					sdfChannelMask = FLinearColor(0,0,0,1);
+					sdfChannelMask = FLinearColor(0, 0, 0, 1);
 				}
 				else
 				{
@@ -57,7 +59,7 @@ void URTMSDF_ThumbnailRenderer::Draw(UObject* object, int32 x, int32 y, uint32 w
 						importData->GenerationSettings.GetChannelBehavior(ERTMSDF_Channels::Green) == ERTMSDF_BitmapChannelBehavior::SDF ? 1.0f : 0.0f,
 						importData->GenerationSettings.GetChannelBehavior(ERTMSDF_Channels::Blue) == ERTMSDF_BitmapChannelBehavior::SDF ? 1.0f : 0.0f,
 						importData->GenerationSettings.GetChannelBehavior(ERTMSDF_Channels::Alpha) == ERTMSDF_BitmapChannelBehavior::SDF ? 1.0f : 0.0f
-					);
+						);
 				}
 			}
 			else
@@ -68,7 +70,8 @@ void URTMSDF_ThumbnailRenderer::Draw(UObject* object, int32 x, int32 y, uint32 w
 		if(const auto* importData = texture->GetAssetUserData<URTMSDF_SVGGenerationAssetData>())
 		{
 			invertSDF = importData->GenerationSettings.bInvertDistance;
-			material = isRGBA ?  settings->SDFThumbnailMSDF_Inst : settings->SDFThumbnailSingleChannel_Inst;
+			uvRange = importData->UVRange;
+			material = isRGBA ? settings->SDFThumbnailMSDF_Inst : settings->SDFThumbnailSingleChannel_Inst;
 			label = isRGBA ? TEXT("MSDF") : TEXT("SDF");
 		}
 
@@ -81,7 +84,9 @@ void URTMSDF_ThumbnailRenderer::Draw(UObject* object, int32 x, int32 y, uint32 w
 			// TODO - maybe these should be cached out somewhere rather than thrashing the objects?
 			auto* materialInstanceDynamic = UMaterialInstanceDynamic::Create(material, this);
 			materialInstanceDynamic->SetTextureParameterValue(ParamTexture, texture);
+			materialInstanceDynamic->SetVectorParameterValue(ParamThumbnailDims, thumbnailDimensions);
 			materialInstanceDynamic->SetScalarParameterValue(ParamInvertDistance, invertSDF ? 1.0f : 0.0f);
+			materialInstanceDynamic->SetScalarParameterValue(ParamUVRange, uvRange);
 			materialInstanceDynamic->SetVectorParameterValue(ParamSDFChannelMask, sdfChannelMask);
 			const auto* materialProxy = materialInstanceDynamic->GetRenderProxy();
 			FCanvasTileItem tileItem(FVector2D(x, y), materialProxy, FVector2D(width, height));
@@ -95,7 +100,7 @@ void URTMSDF_ThumbnailRenderer::Draw(UObject* object, int32 x, int32 y, uint32 w
 				FVector2D padding = labelSize / 5.0;
 				FVector2D scale = size / 96.0;
 				FVector2D shadowOffset(scale * 1.5);
-				FCanvasTextItem TextItem(size - padding - FVector2D(labelSize.X, labelSize.Y) * scale, FText::FromString(label), GEngine->GetSmallFont(), FLinearColor::White*2.0f);
+				FCanvasTextItem TextItem(size - padding - FVector2D(labelSize.X, labelSize.Y) * scale, FText::FromString(label), GEngine->GetSmallFont(), FLinearColor::White * 2.0f);
 				TextItem.bOutlined = true;
 				TextItem.EnableShadow(FLinearColor(0.04f, 0.04f, 0.04f, 1.0f), shadowOffset);
 				TextItem.Scale = scale;

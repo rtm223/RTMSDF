@@ -24,6 +24,8 @@ protected:
 
 private:
 	inline static const FName ParamTexture = TEXT("Texture");
+	inline static const FName ParamThumbnailDims = TEXT("ThumbnailDimensions");
 	inline static const FName ParamInvertDistance = TEXT("InvertDistance");
+	inline static const FName ParamUVRange = TEXT("UVRange");
 	inline static const FName ParamSDFChannelMask = TEXT("SDFChannelMask");
 };

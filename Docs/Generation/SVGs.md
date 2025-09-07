@@ -33,14 +33,31 @@ Bitmap SDFs can be **Single Channel**,  **Single Channel Pseudo**, **Multichanne
 ## SVG Generation Settings
 The following settings are exposed for fine tuning of MSDF texture generation. It is honestly quite unlikely that you will need to use them often, as the default settings are pretty good. They are exposed for handling edge cases and potentially for allowing better defaults for certain art styles etc.
 ### Edge Coloring Mode
-> TODO 
+Determines how MSDF colors each edge
+- **Simple** - Uses angle threshold (3 rads) to test for corners.
+- **InkTrap** - Specialized for fonts with ink traps as features
+-	**Distance** - Theoretically best, but slowest
+
+### Edge Coloring Seed
+Theoretically should make no difference to your output other than changing the colors used for each edge
+
 ### Max Corner Angle
-> TODO 
+Maximum angle to treat a corner as a corner for the sake of edge coloring / preserving sharpness
+
 ### Error Correction Mode
-> TODO 
+Determines how errors are corrected in the algorithm
+- **Edge Only - Fast** - Only correct artifacts at edges. No distance checks
+- **Edge Only - Balanced** - Only correct artifacts at edges, Distance checks at edges only
+- **Edge Only - Full** - Only correct artifacts at edges. Full distance checks
+- **Edge Priority - Fast** - Correct all artifacts, but prioritise preserving edges and corners. No distance checks
+- **Edge Priority - Full** - Correct all artifacts, but prioritise preserving edges and corners. Full distance checks
+- **Indiscriminate - Fast** - Correct all artifacts. No distance checks
+- **Indiscriminate - Full** - Correct all artifacts. Full distance checks
+
 ### Error Correction Deviation
-> TODO 
+Thresholds for error correction
 ### Min Error Improvement
-> TODO 
+Thresholds for error correction
+
 ## Other Generation Settings
 See [Generating SDFs](./Index.md) for other generation settings

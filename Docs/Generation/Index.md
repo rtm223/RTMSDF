@@ -46,7 +46,7 @@ As SDFs can often be smaller than the source assets they represent, texture size
 - A 256x1024 source asset with `Texture Size` of 64 will produce a 64x256 SDF texture
 - A 1024x256 source asset with `Texture Size` of 64 will produce a 256x64 SDF texture
 
-> NOTE: `Texture Size` will be ignored unless all of the target channels contain SDF (or no) data
+> NOTE: `Texture Size` will be ignored unless all of the target channels contain SDF (or no) data.See [Importing SDFs from Bitmaps](./Bitmaps.md).
 
 ### Distance Mode and Distance
 This determines how far the distance field will exend beyond the edge of the shape. In all cases this is the ± range so the total distance field will be twice as long. The following modes are supported
@@ -57,22 +57,24 @@ This determines how far the distance field will exend beyond the edge of the sha
 ### Invert Distance
 By default, textues are imported with a distance field encoded with 0 at the innermost position of the field (inside the shape) and 1 at the outermost point of the field. You can invert this, whcih may make it slightly easier to see what shape the distance field represents. However, it's still not that easy to discern the source shape from the SDF, so it is recomended to use the asset thumbnail renders for that
 
-![](Images/InversionExample_NonInverted.png) ![](Images/InversionExample_Inverted.png) ![](Images/InversionExample_Source.png)
+![](Images/InversionExample_Source.png) &nbsp; ![](Images/InversionExample_NonInverted.png) &nbsp; ![](Images/InversionExample_Inverted.png)
 
-*Examples of Non-Inverted (left) and Inverted (Center) Distance Field textures, alongside source shape*
+*Examples of Non-Inverted (center) and Inverted (right) Distance Field textures, alongside source shape (left)*
 
 ### Scale to Fit Distance
 If true, the resulting SDF will scaled so that the full distance field is contained within the texture. This is useful as it means you do not need to author margins into your source files.
 
-![](Images/ScaleExample_0.05.png) ![](Images/ScaleExample_0.125.png) ![](Images/ScaleExample_0.25.png)
+![](Images/ScaleExample_Source.png) &nbsp; ![](Images/ScaleExample_0.05.png) &nbsp; ![](Images/ScaleExample_0.125.png) &nbsp; ![](Images/ScaleExample_0.25.png)
 
-*Examples of SDFs with normalized distance ranges of 0.05, 0.125 and 0.25 (left to right)*
+*Examples of SDFs with normalized distance ranges of 0.05, 0.125 and 0.25 (left to right, source image leftmost)*
 
-> NOTE: `Scale to Fit Distance` cannot be used unless all of the target channels contain SDF (or no) data
+> NOTE: `Scale to Fit Distance` cannot be used unless all of the target channels contain SDF (or no) data. See [Importing SDFs from Bitmaps](./Bitmaps.md).
 
 > NOTE: for MSDF (**Multichannel**) and **Single Channel Pseudo**  formats it is not guaranteed that the full distance field will be contained inside the resulting texture. If you wish to use the full distance field of an MSDF texture it is recommended that you either
-- Manually author the required ranges in the source asset
-- Generate your SDF with **Multichannel Plus Alpha** format. Use the MSDF for the surface of the shape and true SDF for and glow / shadow / other features using the full distance field. The true SDF will be guaranteed to fit using *Scale to Fit Distance* and is likely to give better results for those effects
+> - Manually author the required ranges in the source asset, or
+> - Generate your SDF with **Multichannel Plus Alpha** format. Use the MSDF for the surface of the shape and true SDF for and glow / shadow / other features using the full distance field. The true SDF will be guaranteed to fit using *Scale to Fit Distance* and is likely to give better results for those effects
+>
+> See [Importing SDFs from SVGs](./SVGs.md)
 
 ## Common Cached Data
 On import the import will also cache out some data that may be useful at runtime. These values can be accessed via the [Blueprint Function Library](../Runtime/BlueprintFunctionLibrary.md)

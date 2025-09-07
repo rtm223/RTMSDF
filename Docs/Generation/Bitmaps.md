@@ -20,7 +20,7 @@ Bitmap SDFs can either be **Single Channel** or **Separate Channel** formats
 ### Single Channel
 **Single Channel** SDFs are a greyscale texture holding 1 SDF. This is likely to be the most common kind of SDF you generate and will be the default if you import an single channel source file.
 
-> NOTE: Unreal Engine currently treats all .psd as RGBA, even if they are in Greyscale mode. The data is there, unreal just ignores it. For now, the plugin assumes a PSD is going to be single channel. If this is not the intent, you can change the SDF `Format` setting and reimport. Future reimports will respect that choice
+> NOTE: Unreal Engine currently treats all .psd as RGBA, even if they are in Greyscale mode. For now, the plugin assumes a PSD should be treated as single channel. If this is not the intent, you can change the SDF `Format` setting and reimport. Future reimports will respect that choice
 
 ### Separate Channels
 **Separate Channels** SDFs allow you to specify how to treat each channel of the source data. Per-channel options are

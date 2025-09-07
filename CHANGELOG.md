@@ -10,30 +10,41 @@ Version numbering as [**Major** . **Minor** . **Patch**]
 - Interchange Support (plus legacy support for projects not using Interchange)
 - 4-50x speed increase on importing
 - Support for wrapped / tiling SDFs
+. Material Nodes for processing an SDF texture to -1 to +1 range
 - Runtime generation of SDFs (low level API, requires user-implemented specifics)
 
 #### SVG Importing
 - Support for multiple shapes
 - Support for different kinds of SVG shapes (path, rect, circle, ellipse, polygon)
 - Support for overlapping shapes
-- [UNTESTED] Probably partial support on Win / Mac
+. Material Nodes for processing an MSDF texture to -1 to +1 range
+- **[UNTESTED]** Probably partial support on Win / Mac
 
 #### All SDFs
 - Automatic rescaling of textures to fit distance field (no need to author assets with margins)
 - Support for non-square source files / SDFs
 - Asset tagging to label specific properties of SDFs (distance field range, source asset dimensions, at runtime)
 - Blueprint library to query SDF features (distance field range, source asset dimensions, at runtime)
-- Much nicer thumbnails
+
+### Documentation
+- Installation instructions
+- Overview of Generation / Import settings
+- Overview of Runtime usage of SDFs
+- Indexing of the Examples folder in the plugin
+- Stubs for Blueprint and Material APIs (to be filled in in future versions)
 
 ### Changed
 - Unreal Engine version support changed to 5.4+
   - Tested in 5.4, 5.5 and 5.6 engine releases
   - Should compile for earlier versions, possibly with some tweaks
-  - Appears to be some incompatibility with `ue5-main` as of 2025-09-01
+  - NOTE: There appears to be some incompatibility with `ue5-main` as of 2025-09-01
 - Both importers now override user-selected `TextureCompression` settings for consistent results
 - Updated concepts of "Inverted" / "Non-Inverted" SDF and made consistent 
   - Non-inverted means that values below 0.5 are inside the shape, above 0.5 are outside the shape
   - Inverted means that values below 0.5 are outside the shape, above 0.5 are inside the shape
+  - Both types of importer follow this convention
+  - NOTE: Vanilla MSDFGen uses the opposite convention, but most SDF math sources assume outside to be positive
+- Fancy new thumbnails styling
 
 ### Performance
 - 4-50x speed increase on importing bitmaps

@@ -17,14 +17,15 @@ open-source, collaborative project in the traditional sense
 
 That said, I'll be happy to accept pull requests for bug fixes, support for alternate versions
 of Unreal, support for additional platforms, corrections to typos, clarifications / corrections
-to documentation, and other minor fixes, but am unlikely to accept larger features or more
+to documentation, and other minor fixes. But I'm unlikely to accept larger features or more
 opinionated changes
 
 ## Raising Issues
 If you discover issues with the functionality, feel free to 
 [raise an issue](https://github.com/rtm223/RTMSDF/issues)  on github if there is not one already
 there. Please include as much detail as possible and where possible / relevant please attach
-source assets to reproduce (for example when a particular file is not importing correctly)
+source assets that reproduce the issue (for example when a particular file is not importing
+correctly)
 
 You are also welcome to raise issues for feature requests, though I offer no guarantees that
 those requests will be implemented

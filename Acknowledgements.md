@@ -1,13 +1,13 @@
 # Acknoledgements
 This project is partially based upon or adapted from various other people's work, reproduced under the following licenses
 
-## Inigo Quilez SDF Resources
+## Inigo Quilez's SDF Resources
 > [Inigo Quilez](https://www.patreon.com/inigoquilez) on Patreon, https://iquilezles.org/
 
 The SDF visualizations I use (including those in the main banner images) are
 based upon the ones that Inigo regualrly uses on
 [Shadertoy](https://www.shadertoy.com/playlist/MXdSRf). I have adaped them
-to have some additional readability around the isolines, but the core largely 
+to have some additional readability for the isolines, but the core largely 
 remains the same. It is a very good visualization, after all
 
 ### **License:** MIT

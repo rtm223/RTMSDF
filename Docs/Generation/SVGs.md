@@ -1,19 +1,28 @@
 # Importing SDFs from SVGs
-> TODO 
+The SVG importer uses [msdfen](https://github.com/Chlumsky/msdfgen) by Viktor Chlumský to create a multichannel distance field from vector inputs
 
 ### SVG Generation Limitations
-> TODO: Maybe move this?
-- MSDF (and therefore SVG support) is only available in-editor
+- MSDF (and therefore SVG support) is currently only available in-editor
 - MSDF uses skia to help parse out SVG files. Currently Skia support is Windows only
 - There is a fallback parser for Mac / Linux
-  - This has not really been tested
+  - This has not been tested on platform
   - It will likely produce inconsistent (and worse) results
-## MSDF Overview
-> TODO 
-## Source Formats
-> TODO 
+  - Future versions of the plugin will address this either by improving the fallback and/or looking into skia support on platforms other than Windows
 
-## SDV SDF Formats
+## MSDF Overview
+MSDF textures differ from traditional SDFs in that they use data in RGB channels to provide distance fields per edge of the shape, in such a way that 2 edges forming a sharp corner should be encoded into different channels. As such, the resultant data is much better at reproducing sharp corners and thin features than a traditional SDF
+
+The algorthims was originally designed for Fonts, and it is what Epic is using for the new [SDF text rendering support](https://dev.epicgames.com/documentation/en-us/unreal-engine/using-signed-distance-field-text-rendering-in-unreal-engine) in UE5.5+. It can be used for vectro graphics as well, and depending on your art style, workflows and other project needs, it might be preferable to the [bitmap-based generation](./Bitmaps.md)
+
+> NOTE: It is currently unclear if Epic intends to extend support for MSDF to SVG importing or not. There is now a rudimentary distance field generator in 5.6+ (see `Engine/Source/Editor/SVGDistanceField`) that can produce MSDFs from a BP function call, but no 1st-class importer/factory support and no meaningfully usable workflows, so it seems worthwhile to continue MSDF support in this Plugin
+
+
+## Source Formats
+The importer should be able to parse most SVG files and will attempt to create a solid shape (or set of shapes) from the silhouette of the SVG. This has not been robustly tested, but seems to function well with SVGs from a variety of sources and works with SVGs exported from Adobe Illustrator
+
+One possible failure case if the SVG has a shape (i.e. a rectangle) as the background of the image. The parser will merge any shapes on top of that into the rectangle shape, even if they are contrasting colors) and just import a large rectrangle
+
+## SVG SDF Formats
 Bitmap SDFs can be **Single Channel**,  **Single Channel Pseudo**, **Multichannel** (MSDF) or **Multichannel Plus Alpha** formats
 
 ### Single Channel
@@ -22,16 +31,19 @@ Bitmap SDFs can be **Single Channel**,  **Single Channel Pseudo**, **Multichanne
 ### Single Channel Pseudo
 **Single Channel Pseudo** SDFs are a greyscale texture holding 1 SDF, that has corner features more akin to MSDF fields. This format is effectively an MSDF that has been "baked" down to a single channel. It is unlikely that this is the optimal format for any real use case, as the baking process effectively strips the benefits that MSDF has in handling sharp corners better than a true SDF.
 
+> NOTE: These may be renamed from pseudo-SDF to perpendicular SDF in a later version
+
 ### Multichannel (MSDF)
 **Multichannel** SDFs hold an MSDF texture in the RGB channels. This can be converted to SDF at runtime using the median of the three channels. See the `MSDF Channel Median` and `Process MSDF Texture` material expressions, under `RTM > SDF > Textures` in the material editor. It is unlikely that this optimal format for any use case, (see comments in **Multichannel Plus Alpha**)
 
 ### Multichannel Plus Alpha
 **Multichannel Plus Alpha** SDFs hold an MSDF in RGB and a true SDF in alpha. This is probably the most common format for imported SVGs because it allows the higher-precision corners of MSDF for the edge of your shape, but has the softer true SDF if you wish to do effects (glows, soft shadows, pulsing outlines etc.) in the distance field
 
-> NOTE: As the **Multichannel** format has an empty alpha channel, using that channel for a true SDF has no impact on memory footprint and is effectively free
+> NOTE: As the **Multichannel** format has an empty alpha channel, opting to use that channel for a true SDF has no impact on memory footprint and is effectively free
 
 ## SVG Generation Settings
-The following settings are exposed for fine tuning of MSDF texture generation. It is honestly quite unlikely that you will need to use them often, as the default settings are pretty good. They are exposed for handling edge cases and potentially for allowing better defaults for certain art styles etc.
+The following settings are exposed for fine tuning of MSDF texture generation. It is quite unlikely that you will need to use them often, as the default settings are pretty good. They are exposed for handling edge cases and potentially for allowing better defaults for certain art styles etc.
+
 ### Edge Coloring Mode
 Determines how MSDF colors each edge
 - **Simple** - Uses angle threshold (3 rads) to test for corners.

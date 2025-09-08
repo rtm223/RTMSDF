@@ -9,12 +9,15 @@ Currently supports UE5.4+
 See [Changelog](CHANGELOG.md) for details of what is new in version 1.0.
 
 ## Downloading from GitHub
-Either clone this repository or download one of the pre-built binary releases and add it
-to either `{Project}/Plugins/RTMSDF/` or `{Engine}/Plugins/RTMSDF/` directory
+You can either clone this repository if you're comfortable with git and building Unreal
+cpp projectsfrom source, otherwise you can download a pre-built binary release.
 
-> Note: the cloned repository will not have binaries included, so you will need to build
-them yourself in a cpp project. Blueprint only projects will need to take the latest version
-from Releases
+### Cloning the repository 
+Source files will need to be placed in either `{Project}/Plugins/RTMSDF/` or `{Engine}/Plugins/RTMSDF/`
+
+### Download Binary releases
+Download the latest binary [release](https://github.com/rtm223/RTMSDF/releases) as a zip file and extract it
+in either your `{Project}/Plugins/` or `{Engine}/Plugins/` directory
 
 ## Quick Start
 ### 1. Enable the Plugin

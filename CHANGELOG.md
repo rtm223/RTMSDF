@@ -4,7 +4,15 @@ Version numbering as [**Major** . **Minor** . **Patch**]
 - **Minor** : Additional features and changes that should not break compatibility outside of minor deprecations
 - **Patch** : Bug fixes, minor edits that do not change behaviour
 
-## [1.0.0] Initial Release [BETA]
+## Unreleased Changes
+> NOTE: The following changes are live in this branch, but have not been rolled into any release yet
+
+### Changed
+- Project Settings - defaults for multicahnnel bitmap sources can be a single channel SDF
+
+## [1.0.0] Initial Release
+Released 2025-09-08
+
 ### Added
 #### Bitmap Importing
 - Interchange Support (plus legacy support for projects not using Interchange)

@@ -53,7 +53,7 @@ struct RTMSDF_API FRTMSDF_BitmapGenerationSettings : public FRTMSDF_CommonGenera
 	UPROPERTY()
 	int VersionNumber = 0;
 
-	UPROPERTY(EditAnywhere, Category="ImportNew", meta=(EditCondition="NumSourceChannels > 1 && !bIsInProjectSettings", HideEditConditionToggle, ValidEnumValues="SingleChannel, SeparateChannels"))
+	UPROPERTY(EditAnywhere, Category="ImportNew", meta=(EditCondition="NumSourceChannels > 1", HideEditConditionToggle, ValidEnumValues="SingleChannel, SeparateChannels"))
 	ERTMSDF_SDFFormat Format = ERTMSDF_SDFFormat::SingleChannel;
 
 	// How to handle the red channel from the source data
@@ -72,8 +72,9 @@ struct RTMSDF_API FRTMSDF_BitmapGenerationSettings : public FRTMSDF_CommonGenera
 	UPROPERTY(EditAnywhere, Category="ImportNew", meta=(EditCondition="NumSourceChannels > 3 && Format == ERTMSDF_SDFFormat::SeparateChannels", EditConditionHides))
 	ERTMSDF_BitmapChannelBehavior AlphaChannel = ERTMSDF_BitmapChannelBehavior::SDF;
 
-	/* Which channel should be used to generate the SDF - unused channels will be discarded */
-	UPROPERTY(EditAnywhere, Category="Import", meta=(EditCondition="NumSourceChannels > 1 && Format == ERTMSDF_SDFFormat::SingleChannel", EditConditionHides, DisplayName="SDF Channel"))
+	/* Which channel from the source data should be used to generate the SDF
+	 * Unused channels will be discarded as this is a single-channel SDF */
+	UPROPERTY(EditAnywhere, Category="Import", meta=(EditCondition="NumSourceChannels > 1 && Format == ERTMSDF_SDFFormat::SingleChannel", EditConditionHides, DisplayName="Source Channel"))
 	ERTMSDF_Channels SDFChannel = ERTMSDF_Channels::Red;
 
 	/* Output size of generated SDF texture - for non-square textures this will be the shortest edge */

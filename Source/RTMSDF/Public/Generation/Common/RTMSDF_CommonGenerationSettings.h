@@ -48,7 +48,7 @@ struct FRTMSDF_CommonGenerationSettings
 	bool bScaleToFitDistance = true;
 
 	UPROPERTY()
-	bool bIsInProjectSettings;
+	bool bIsInProjectSettings = false;
 
 	virtual ~FRTMSDF_CommonGenerationSettings() = default;
 

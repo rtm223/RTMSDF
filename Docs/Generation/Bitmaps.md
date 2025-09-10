@@ -18,7 +18,9 @@ RTMSDF can import from all bitmap filetypes that Unreal supports, including
 Bitmap SDFs can either be **Single Channel** or **Separate Channel** formats
 
 ### Single Channel
-**Single Channel** SDFs are a greyscale texture holding 1 SDF. This is likely to be the most common kind of SDF you generate and will be the default if you import an single channel source file.
+**Single Channel** SDFs are a greyscale texture holding 1 SDF. This is likely to be the most common kind of SDF you generate and will be the only option if you import an single channel source file
+
+When importing a single channel SDF from a multichannel Source file, you can select which channel from the source will be used for the SDF
 
 > NOTE: Unreal Engine currently treats all .psd as RGBA, even if they are in Greyscale mode. For now, the plugin assumes a PSD should be treated as single channel. If this is not the intent, you can change the SDF `Format` setting and reimport. Future reimports will respect that choice
 

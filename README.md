@@ -21,11 +21,12 @@ in either your `{Project}/Plugins/` or `{Engine}/Plugins/` directory
 
 ## Quick Start
 ### 1. Enable the Plugin
-Enable the plugin, either by manually adding it to your `.uproject` file, or in editor via the Plugins window:
+Ensure that the plugin is enabled for your project, either by manually adding it to your `.uproject` file,
+or in editor via the Plugins window:
 1. Choose `Edit > Plugins` from the top menu bar
 2. Find the plugin called **Signed Distance Fields [RTMSDF]** or search "RTMSDF"
-3. Check the box to the left of the icon
-4. Restart the editor
+3. Ensure the box to the left of the icon is checked
+4. If you needed to check the box, restart the editor
 
 ![](Docs/Images/Configure_EnablePlugin.png)
 

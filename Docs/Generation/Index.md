@@ -60,10 +60,13 @@ This determines how far the distance field will exend beyond the edge of the sha
 - **Pixels** - Range in the target SDF. i.e. if the `Texture Size` is 64px and `Pixel Distance` range is 8px, this is equivalent to a normalized range of 0.125
 
 ### Invert Distance
-By default, textues are imported with a distance field encoded with 0 at the innermost position of the field (inside the shape) and 1 at the outermost point of the field. You can invert this, whcih may make it slightly easier to see what shape the distance field represents. However, it's still not that easy to discern the source shape from the SDF, so it is recomended to use the asset thumbnail renders for that
+By default, textues are imported with a distance field encoded with 0 at the innermost position of the field (inside the shape) and 1 at the outermost point of the field. You can invert this, whcih may make it slightly easier to see what shape the distance field represents. However, it's still not that easy to discern the source shape from the SDF (see below), so it is recomended to use the asset thumbnail renders for that
 
 ![](Images/InversionExample_Source.png) &nbsp; ![](Images/InversionExample_NonInverted.png) &nbsp; ![](Images/InversionExample_Inverted.png)
 <br/>*Examples of Non-Inverted (center) and Inverted (right) Distance Field textures, alongside source shape (left)*
+
+![](Images/InversionExample_MSDF_Source.png) &nbsp; ![](Images/InversionExample_MSDF_NonInverted.png) &nbsp; ![](Images/InversionExample_MSDF_Inverted.png)
+<br/>*Examples of Non-Inverted (center) and Inverted (right) MSDF textures, alongside source shape (left)*
 
 ### Scale to Fit Distance
 If true, the source shape will scaled so that the full distance field is contained within the texture. This is useful as it means you do not need to author margins into your source files

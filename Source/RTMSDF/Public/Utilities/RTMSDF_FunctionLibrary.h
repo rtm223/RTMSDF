@@ -13,6 +13,10 @@ class RTMSDF_API URTMSDF_FunctionLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
+	// Calculates the scaling factor needed to offset a given UV Range
+	UFUNCTION(BlueprintPure, Category="RTM|SDF|Utilities", meta=(DisplayName = "UV Range to Scaling Factor"))
+	static float UVRangeToScalingFactor(float uvRange);
+
 	// Returns true if this texture has been imported as a signed distance field
 	UFUNCTION(BlueprintPure, Category="RTM|SDF|Utilities", meta=(DisplayName = "Is SDF"))
 	static bool IsSDFTexture(const UTexture2D* texture);
@@ -37,6 +41,18 @@ public:
 	// UV range is the range of the distance field, normalized against the shortest edge of the texture
 	UFUNCTION(BlueprintPure, Category="RTM|SDF|Utilities", meta=(DisplayName = "Get SDF UV Range"))
 	static float GetSDFUVRange(const UTexture2D* texture);
+
+	// Returns true if the texture was imported with the Invert Distance setting
+	UFUNCTION(BlueprintPure, Category="RTM|SDF|Utilities", meta=(DisplayName = "Is Inverted SDF"))
+	static bool IsInvertedSDF(const UTexture2D* texture);
+
+	// Returns true if the texture was imported with the Scale to Fit Distance setting
+	UFUNCTION(BlueprintPure, Category="RTM|SDF|Utilities", meta=(DisplayName = "Is Scaled to Fit Distance"))
+	static bool IsScaledToFitDistance(const UTexture2D* texture);
+
+	// Calculates the scaling factor needed to offset the shrinking that occurs during import of a texture
+	UFUNCTION(BlueprintPure, Category="RTM|SDF|Utilities", meta=(DisplayName = "Get SDF Scaling Factor"))
+	static float GetSDFScalingFactor(const UTexture2D* texture);
 
 	// Returns true if this texture has been imported as a signed distance field
 	// NOTE: At runtime this relies on the Asset Registry Tags, so Textures must be in the asset registry (by default this is true)
@@ -68,4 +84,16 @@ public:
 	// NOTE: At runtime this relies on the Asset Registry Tags, so Textures must be in the asset registry (by default this is true)
 	UFUNCTION(BlueprintPure, Category="RTM|SDF|Utilities", meta=(DisplayName = "Get SDF UV Range (Soft Texture)"))
 	static float GetSDFUVRangeFromSoftTexure(const TSoftObjectPtr<UTexture2D>& softTexture);
+
+	// Returns true if the texture was imported with the Invert Distance setting
+	UFUNCTION(BlueprintPure, Category="RTM|SDF|Utilities", meta=(DisplayName = "Is Inverted SDF (Soft Texture"))
+	static bool IsInvertedSDFSoftTexture(const TSoftObjectPtr<UTexture2D>& softTexture);
+
+	// Returns true if the texture was imported with the Scale to Fit Distance setting
+	UFUNCTION(BlueprintPure, Category="RTM|SDF|Utilities", meta=(DisplayName = "Is Scaled to Fit Distance (Soft Texture)"))
+	static bool IsSoftTextureScaledToFitDistance(const TSoftObjectPtr<UTexture2D>& softTexture);
+
+	// Calculates the scaling factor needed to offset the shrinking that occurs during import of a texture
+	UFUNCTION(BlueprintPure, Category="RTM|SDF|Utilities", meta=(DisplayName = "Get SDF Scaling Factor (Soft Texture)"))
+	static float GetSDFScalingFactorFromSoftTexture(const TSoftObjectPtr<UTexture2D>& softTexture);
 };

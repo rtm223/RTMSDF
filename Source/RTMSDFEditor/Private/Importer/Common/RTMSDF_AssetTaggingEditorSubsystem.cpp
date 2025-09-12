@@ -23,6 +23,8 @@ namespace RTM::SDF::AssetTaggingEditorSubsystemStatics
 		const auto& settings = assetData->GetGenerationSettings();
 		outTags.Add({SDFFormatTag, GetEnumNameString(settings.GetFormat()), UObject::FAssetRegistryTag::TT_Numerical});
 		outTags.Add({UVRangeTag, FString::Printf(TEXT("%f"), assetData->UVRange), UObject::FAssetRegistryTag::TT_Numerical});
+		outTags.Add({InvertedTag, BoolString(settings.bInvertDistance), UObject::FAssetRegistryTag::TT_Numerical});
+		outTags.Add({ScaledToFitTag, BoolString(settings.bScaleToFitDistance), UObject::FAssetRegistryTag::TT_Numerical});
 		outTags.Add({SourceWidthTag, FString::FromInt(assetData->SourceDimensions.X), UObject::FAssetRegistryTag::TT_Numerical});
 		outTags.Add({SourceHeightTag, FString::FromInt(assetData->SourceDimensions.Y), UObject::FAssetRegistryTag::TT_Numerical});
 	}

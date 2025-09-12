@@ -50,6 +50,11 @@ namespace RTM::SDF::FunctionLibraryStatics
 	}
 }
 
+float URTMSDF_FunctionLibrary::UVRangeToScalingFactor(float uvRange)
+{
+	return 1.0f / (1.0f - (uvRange * 2.0f));
+}
+
 bool URTMSDF_FunctionLibrary::IsSDFTexture(const UTexture2D* texture)
 {
 	const auto* assetData = texture ? const_cast<UTexture2D*>(texture)->GetAssetUserData<URTMSDF_GenerationAssetData_Base>() : nullptr;
@@ -85,6 +90,28 @@ float URTMSDF_FunctionLibrary::GetSDFUVRange(const UTexture2D* texture)
 	return assetData ? assetData->UVRange : -1.0f;
 }
 
+bool URTMSDF_FunctionLibrary::IsInvertedSDF(const UTexture2D* texture)
+{
+	const auto* assetData = texture ? const_cast<UTexture2D*>(texture)->GetAssetUserData<URTMSDF_GenerationAssetData_Base>() : nullptr;
+	return assetData ? assetData->GetGenerationSettings().bInvertDistance : false;
+}
+
+bool URTMSDF_FunctionLibrary::IsScaledToFitDistance(const UTexture2D* texture)
+{
+	const auto* assetData = texture ? const_cast<UTexture2D*>(texture)->GetAssetUserData<URTMSDF_GenerationAssetData_Base>() : nullptr;
+	return assetData ? assetData->GetGenerationSettings().bScaleToFitDistance : false;
+}
+
+float URTMSDF_FunctionLibrary::GetSDFScalingFactor(const UTexture2D* texture)
+{
+	const auto* assetData = texture ? const_cast<UTexture2D*>(texture)->GetAssetUserData<URTMSDF_GenerationAssetData_Base>() : nullptr;
+	ensureAlways(!assetData || assetData->UVRange > 0);
+	if(!assetData || !assetData->GetGenerationSettings().bScaleToFitDistance)
+		return 1.0f;
+
+	return UVRangeToScalingFactor(assetData->UVRange);
+}
+
 bool URTMSDF_FunctionLibrary::IsSDFSoftTexture(const TSoftObjectPtr<UTexture2D>& softTexture)
 {
 	return GetSDFFormatFromSoftTexture(softTexture) != ERTMSDF_SDFFormat::Invalid;
@@ -93,9 +120,10 @@ bool URTMSDF_FunctionLibrary::IsSDFSoftTexture(const TSoftObjectPtr<UTexture2D>&
 ERTMSDF_SDFFormat URTMSDF_FunctionLibrary::GetSDFFormatFromSoftTexture(const TSoftObjectPtr<UTexture2D>& softTexture)
 {
 	using namespace RTM::SDF;
+	using namespace RTM::SDF::AssetTags;
 
 	FString tagValue;
-	if(FunctionLibraryStatics::TryGetAssetTag(softTexture, AssetTags::SDFFormatTag, tagValue))
+	if(FunctionLibraryStatics::TryGetAssetTag(softTexture, SDFFormatTag, tagValue))
 		return FunctionLibraryStatics::GetEnumValueFromName(FName(tagValue), ERTMSDF_SDFFormat::Invalid);
 
 	return ERTMSDF_SDFFormat::Invalid;
@@ -104,10 +132,11 @@ ERTMSDF_SDFFormat URTMSDF_FunctionLibrary::GetSDFFormatFromSoftTexture(const TSo
 FIntPoint URTMSDF_FunctionLibrary::GetSourceDimensionsFromSoftTexture(const TSoftObjectPtr<UTexture2D>& softTexture)
 {
 	using namespace RTM::SDF;
+	using namespace RTM::SDF::AssetTags;
 
 	FString widthValue, heightValue;
-	const bool dataValid = FunctionLibraryStatics::TryGetAssetTag(softTexture, AssetTags::SourceWidthTag, widthValue)
-		&& FunctionLibraryStatics::TryGetAssetTag(softTexture, AssetTags::SourceHeightTag, heightValue);
+	const bool dataValid = FunctionLibraryStatics::TryGetAssetTag(softTexture, SourceWidthTag, widthValue)
+		&& FunctionLibraryStatics::TryGetAssetTag(softTexture, SourceHeightTag, heightValue);
 
 	return dataValid ? FIntPoint(FCString::Atoi(*widthValue), FCString::Atoi(*heightValue)) : FIntPoint(-1, -1);
 }
@@ -125,10 +154,40 @@ bool URTMSDF_FunctionLibrary::IsMSDFSoftTexture(const TSoftObjectPtr<UTexture2D>
 float URTMSDF_FunctionLibrary::GetSDFUVRangeFromSoftTexure(const TSoftObjectPtr<UTexture2D>& softTexture)
 {
 	using namespace RTM::SDF;
+	using namespace RTM::SDF::AssetTags;
 
 	FString tagValue;
-	if(FunctionLibraryStatics::TryGetAssetTag(softTexture, AssetTags::UVRangeTag, tagValue))
+	if(FunctionLibraryStatics::TryGetAssetTag(softTexture, UVRangeTag, tagValue))
 		return FCString::Atof(*tagValue);
 
 	return -1;
+}
+
+bool URTMSDF_FunctionLibrary::IsInvertedSDFSoftTexture(const TSoftObjectPtr<UTexture2D>& softTexture)
+{
+	using namespace RTM::SDF;
+	using namespace RTM::SDF::AssetTags;
+
+	FString tagValue;
+	return FunctionLibraryStatics::TryGetAssetTag(softTexture, InvertedTag, tagValue)
+		&& BoolValue(tagValue);
+}
+
+bool URTMSDF_FunctionLibrary::IsSoftTextureScaledToFitDistance(const TSoftObjectPtr<UTexture2D>& softTexture)
+{
+	using namespace RTM::SDF;
+	using namespace RTM::SDF::AssetTags;
+
+	FString tagValue;
+	return FunctionLibraryStatics::TryGetAssetTag(softTexture, ScaledToFitTag, tagValue)
+		&& BoolValue(tagValue);
+}
+
+float URTMSDF_FunctionLibrary::GetSDFScalingFactorFromSoftTexture(const TSoftObjectPtr<UTexture2D>& softTexture)
+{
+	if(!IsSoftTextureScaledToFitDistance(softTexture))
+		return 1.0f;
+
+	const float uvRange = GetSDFUVRangeFromSoftTexure(softTexture);
+	return UVRangeToScalingFactor(uvRange);
 }

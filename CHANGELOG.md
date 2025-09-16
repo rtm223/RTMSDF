@@ -10,12 +10,13 @@ Version numbering as [**Major** . **Minor** . **Patch**]
 ### Changed
 - Project Settings - defaults for multicahnnel bitmap sources can be a single channel SDF
 - Notes and clarifications to existing examples
-- Updated all Example Textures to have additional meta tags
+- Updated all Example Textures to have additional meta tags (for soft texture BPFL functions)
+- Updated Example materials to use the custom FWidth
 
 ### Added
-- Additional Texture Processing Material Functions (texture to edge mask, UV scaling)
-- Additional BPFL functions - getters for for inverted, scaled to fit, and uv scaling calculations
-- Simple base materials for taking an SDF texture and reproducing an icon suitable for UI
+- Additional Texture Processing Material Functions (texture to edge mask, UV scaling, FWidth)
+- Additional BPFL functions - getters for inverted, scaled to fit, and uv scaling calculations
+- Simple base materials for taking an SDF texture and reproducing an icon suitable for UI, with or without an outline / stroke
 
 ## [1.0.0] Initial Release
 Released 2025-09-08

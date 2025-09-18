@@ -8,6 +8,8 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Blueprint/WidgetBlueprintGeneratedClass.h"
 
+#if WITH_EDITOR
+
 TArray<UClass*> UURTMSDF_EditorUtilityLibrary::FindBlueprintClasses(const FString& searchLocation, const UClass* blueprintClass)
 {
 	if(!blueprintClass)
@@ -69,3 +71,4 @@ void UURTMSDF_EditorUtilityLibrary::SetUtilityWidgetWindowSize(UEditorUtilityWid
 			window->Resize(size);
 	}
 }
+#endif WITH_EDITOR

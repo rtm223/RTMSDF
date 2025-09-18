@@ -17,6 +17,7 @@ Version numbering as [**Major** . **Minor** . **Patch**]
 - Additional Texture Processing Material Functions (texture to edge mask, UV scaling, FWidth)
 - Additional BPFL functions - getters for inverted, scaled to fit, and uv scaling calculations
 - Simple base materials for taking an SDF texture and reproducing an icon suitable for UI, with or without an outline / stroke
+- Updated examples, with an interactive example browser
 
 ## [1.0.0] Initial Release
 Released 2025-09-08

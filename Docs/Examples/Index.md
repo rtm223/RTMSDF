@@ -2,25 +2,23 @@
 
 The plugin contains various examples of how to work with SDF textures, which you can find in the Content Browser under `All/Plugins/Signed Distance Fields [RTMSDF] Content/Examples/`. If you cannot see this directory check the content browser settings that `Show Plugin Content` is checked. There are also a small selection of SDF textures, used in these examples
 
+## The Example Browser
+The examples are now presented as an interactive pop-up window, which you can activate by finding the widget called `RUN_ME` in the examples foleder.
+
 ![](Images/Examples_ContentBrowser.png)
 
-## Using the Examples
-Most of the examples in the plugin are materials, with small amounts of annotation inside. These each all paired with a material instance to easily preview parameter changes, e.g.
-- `M_RTMSDF_EGBasic_01_SDFIcon_Simple` - Material (prefix `M_`)
-- `MI_RTMSDF_EGBasic_01_SDFIcon_Simple` - Material Instance (prefix `MI_`)
+### Using the Examples Browser
+The examples browser is quite simple to navigate. Each example has some tweakable settings that attempt to show some feature of SDFs. You can navigate between examples using the Next / Previous buttons, and can view the material used in the example by pressing the view material button at the bottom of the screen
 
-## Examples
-### Textures
+![](Images/Examples_Browser.png)
+
+### Notes on Examples Materials
+The materials in these examples are intended for explaining concepts, and as such may not be ideal or fully optimised for production usage
+
+## Textures
 A small collection of textures that have been imported as SDFs. The source assets for these are included in `{PluginDir}/SourceAssets/Examples/Textures`
 
 These textures are all from [Game-icons.net](https://game-icons.net/), created by Lorc and Delapouite
 
-### Basic
-These examples show some of the basic ways of using SDFs, including
-- Rendering a flat icon from SDF data
-- Adding strokes / outlines
-- Glow / bloom effects
-- Drop shadows
-- Morphing between shapes
-
-These examples are intentionally simple, to show a few examples of how to start working with your SDF assets, and give an overview of the math used to turn SDFs into graphical effects
+## Legacy Examples
+In version 1.0.0 there were some examples that were just a collection of annotated materials and material interfaces. These have been moved to `Examples/Legacy/` but are considered to be superceded by the Examples browser

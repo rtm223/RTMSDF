@@ -29,6 +29,10 @@ public class RTMSDFEditor : ModuleRules
 				"RHI",
 				"PropertyEditor",
 				"InterchangeCore",
+				"Slate",
+				"SlateCore",
+				"UMGEditor",
+				"Blutility",
 				"RTMSDF",
 			});
 	}

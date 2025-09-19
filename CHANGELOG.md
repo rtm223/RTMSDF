@@ -5,6 +5,10 @@ Version numbering as [**Major** . **Minor** . **Patch**]
 - **Patch** : Bug fixes, minor edits that do not change behaviour
 
 
+## Unreleased Changes
+> NOTE: The following changes are live in this branch, but have not been rolled into any release yet
+
+
 ## [1.1.0] Improved Examples and Material Toolkit
 Released 2025-09-19
 

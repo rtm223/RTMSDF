@@ -4,8 +4,9 @@ Version numbering as [**Major** . **Minor** . **Patch**]
 - **Minor** : Additional features and changes that should not break compatibility outside of minor deprecations
 - **Patch** : Bug fixes, minor edits that do not change behaviour
 
-## Unreleased Changes
-> NOTE: The following changes are live in this branch, but have not been rolled into any release yet
+
+## [1.1.0] Improved Examples and Material Toolkit
+Released 2025-09-19
 
 ### Changed
 - Project Settings - defaults for multicahnnel bitmap sources can be a single channel SDF
@@ -17,7 +18,9 @@ Version numbering as [**Major** . **Minor** . **Patch**]
 - Additional Texture Processing Material Functions (texture to edge mask, UV scaling, FWidth)
 - Additional BPFL functions - getters for inverted, scaled to fit, and uv scaling calculations
 - Simple base materials for taking an SDF texture and reproducing an icon suitable for UI, with or without an outline / stroke
-- Updated examples, with an interactive example browser
+- Updated examples, with an interactive example browser (see [Examples](./Docs/Examples/Index.md))
+- material library API documentation (see [Material Functions](./Docs/MaterialFunctions/Index.md))
+
 
 ## [1.0.0] Initial Release
 Released 2025-09-08

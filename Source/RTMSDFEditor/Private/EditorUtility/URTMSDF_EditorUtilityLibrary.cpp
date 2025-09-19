@@ -18,7 +18,6 @@ TArray<UClass*> UURTMSDF_EditorUtilityLibrary::FindBlueprintClasses(const FStrin
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::Get().LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
 	const FString referenceDirectory = FPaths::GetPath(searchLocation);
 
-	// Form a filter from the paths
 	FARFilter filter;
 	filter.bRecursivePaths = true;
 	filter.bRecursiveClasses = true;
@@ -28,9 +27,22 @@ TArray<UClass*> UURTMSDF_EditorUtilityLibrary::FindBlueprintClasses(const FStrin
 	TArray<FAssetData> assetList;
 	AssetRegistryModule.Get().GetAssets(filter, assetList);
 
+	const UClass* nativeClass = blueprintClass;
+	while(!nativeClass->IsNative())
+		nativeClass = nativeClass->GetSuperClass();
+
+	const FString nativeClassPath = FObjectPropertyBase::GetExportPath(nativeClass);
+
 	TArray<UClass*> blueprints;
 	for(auto& assetData : assetList)
 	{
+		FString assetNativeClass;
+		const bool matchesNativeClass = assetData.GetTagValue(FBlueprintTags::NativeParentClassPath, assetNativeClass)
+			&& nativeClassPath == assetNativeClass;
+
+		if(!matchesNativeClass)
+			continue;
+
 		if(auto* bp = Cast<UBlueprint>(assetData.FastGetAsset(true)))
 		{
 			if(bp->bGenerateAbstractClass)

@@ -21,12 +21,10 @@ Function for visualizing distance fields, based upon the pattern popularised by 
 | **IsolineScale** | Scalar | How many isolines to show per unit distance|
 | **IsolineIntensity** | Scalar | How many isolines to show per unit distance|
 | **UVs** | Vector2 | (optional) if specified will be used to mark the origin and axes of the UV space. This can be useful for understanding how various SDF shapes are being defined|
-|
 
 | **Output** | **Output Name** | **Description** |
 |-|-|-|
 | ![](Images/Renders/MF_RTMSDF_IQ_DistanceVisualizer.Result.64x64.png) | **Result** |  |
-|
 
 ## IQ SDF Visualizer (Textures)
 > `/RTMSDF/Materials/MaterialFunctions/Visualizers/MF_RTMSDF_IQ_TextureDistanceVisualizer`
@@ -44,11 +42,9 @@ Function for visualizing distance fields from textures. This version is simplifi
 | **NegativeColor** | Vector3 | Base color for the negative portion of the SDF|
 | **StrokeWidth** | Scalar | Width of the stroke at the surface of the object (distance = 0). Width is in in distance field units|
 | **InnerDistanceIntensity** | Scalar | How strong the inner darkening effect is|
-|
 
 | **Output** | **Output Name** | **Description** |
 |-|-|-|
 | ![](Images/Renders/MF_RTMSDF_IQ_TextureDistanceVisualizer.Result.64x64.png) | **Result** |  |
-|
 
 

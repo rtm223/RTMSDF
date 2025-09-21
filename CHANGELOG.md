@@ -8,6 +8,8 @@ Version numbering as [**Major** . **Minor** . **Patch**]
 ## Unreleased Changes
 > NOTE: The following changes are live in this branch, but have not been rolled into any release yet
 
+### Added
+- Basic Materials for surface and decal domains, intended for in-world icons and to demonstrate that world space can use simple thresholding
 
 ## [1.1.0] Improved Examples and Material Toolkit
 Released 2025-09-19

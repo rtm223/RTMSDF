@@ -1,6 +1,6 @@
 ![RTMSDF - 2D Signed Distance Field Generators & Importers for Unreal Engine 5](Docs/Images/RTMSDF_Banner_830x300.png)
 
-# RTMSDF v1.0.0
+# RTMSDF
 An Unreal Engine 5 Plugin that provides importers for generating 2D SDFs from .svg 
 source files and all Unreal-supported texture source files (.psd, .png, .tif etc). 
 Uses [MSDFGen](https://github.com/Chlumsky/msdfgen) for processing of SVG files. 

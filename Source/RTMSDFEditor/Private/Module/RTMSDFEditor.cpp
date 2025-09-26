@@ -3,13 +3,18 @@
 #include "RTMSDFEditor.h"
 #include "ISettingsModule.h"
 #include "ISettingsSection.h"
+#include "PropertyEditorDelegates.h"
+#include "PropertyEditorModule.h"
 #include "DetailsCustomization/RTMSDF_SettingsStructCustomization.h"
+#include "Engine/Texture2D.h"
+#include "Modules/ModuleManager.h"
 #include "Settings/RTMSDF_PerUserEditorSettings.h"
 #include "Settings/RTMSDF_ProjectSettings.h"
 #include "ThumbnailRendering/ThumbnailManager.h"
 #include "Thumbnails/RTMSDF_ThumbnailRenderer.h"
 
 #define LOCTEXT_NAMESPACE "RTMSDFEditorModule"
+class FPropertyEditorModule;
 DEFINE_LOG_CATEGORY(RTMSDFEditor);
 
 IMPLEMENT_MODULE(FRTMSDFEditorModule, RTMSDFEditor)

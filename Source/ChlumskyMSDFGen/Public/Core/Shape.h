@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
 #include <vector>
 #include "Contour.h"
 #include "Scanline.h"

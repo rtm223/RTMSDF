@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Richard Meredith AB. All Rights Reserved
 
 #include "RTMSDF_AssetTaggingEditorSubsystem.h"
+#include "Editor.h"
+#include "Engine/Texture2D.h"
 #include "Generation/Common/RTMSDF_GenerationAssetData_Base.h"
 #include "Subsystems/EditorAssetSubsystem.h"
 #include "UObject/AssetRegistryTagsContext.h"

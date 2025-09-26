@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
 #include "Shape.h"
 #include "edge-selectors.h"
 

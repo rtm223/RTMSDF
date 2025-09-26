@@ -2,6 +2,7 @@
 
 #include "RTMSDF_SettingsStructCustomization.h"
 #include "IDetailChildrenBuilder.h"
+#include "PropertyHandle.h"
 
 void FRTMSDF_SettingsStructCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> structPropertyHandle, IDetailChildrenBuilder& structBuilder, IPropertyTypeCustomizationUtils& structCustomizationUtils)
 {

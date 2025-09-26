@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
 #include <vector>
 #include "base.h"
 

@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
 #include "BitmapRef.hpp"
 
 #ifndef MSDFGEN_PUBLIC

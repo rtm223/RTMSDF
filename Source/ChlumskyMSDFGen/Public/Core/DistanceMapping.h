@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
 #include "Range.hpp"
 
 namespace msdfgen {

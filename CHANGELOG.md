@@ -4,6 +4,11 @@ Version numbering as [**Major** . **Minor** . **Patch**]
 - **Minor** : Additional features and changes that should not break compatibility outside of minor deprecations
 - **Patch** : Bug fixes, minor edits that do not change behaviour
 
+## [1.1.1] UE5.7 Preview Support
+Released 2025-09-26
+
+Note: only 5.7 builds have been created for this patch version
+Previous UE versions should use 1.1.0
 
 ## [1.1.0] Improved Examples and Material Toolkit
 Released 2025-09-19

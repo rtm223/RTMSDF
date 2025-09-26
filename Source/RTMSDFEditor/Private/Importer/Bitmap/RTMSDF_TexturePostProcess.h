@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "Generation/Bitmap/RTMSDF_BitmapGenerationSettings.h"
 
+class UTexture2D;
+enum ETextureSourceFormat : int;
 enum class ERTMSDF_Channels : uint8;
 struct FRTMSDFTextureSettingsCache;
 struct FRTMSDF_BitmapGenerationSettings;

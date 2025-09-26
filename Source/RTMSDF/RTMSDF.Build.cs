@@ -9,7 +9,6 @@ public class RTMSDF : ModuleRules
 		bool testIWYU = false;
 		PCHUsage = testIWYU ? PCHUsageMode.NoPCHs : PCHUsageMode.UseExplicitOrSharedPCHs;
 		bUseUnity = !testIWYU;
-
 		CppStandard = CppStandardVersion.Latest;
 
 		PublicDependencyModuleNames.AddRange(

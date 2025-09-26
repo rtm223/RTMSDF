@@ -11,7 +11,6 @@ public class ChlumskyMSDFGen : ModuleRules
 		bool testIWYU = false;
 		PCHUsage = testIWYU ? PCHUsageMode.NoPCHs : PCHUsageMode.UseExplicitOrSharedPCHs;
 		bUseUnity = !testIWYU;
-
 		CppStandard = CppStandardVersion.Latest;
 
 		PublicDependencyModuleNames.Add("Core");

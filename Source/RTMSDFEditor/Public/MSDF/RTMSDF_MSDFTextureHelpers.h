@@ -1,6 +1,9 @@
 ﻿// Copyright (c) Richard Meredith AB. All Rights Reserved
 
 #pragma once
+#include "CoreMinimal.h"
+
+class UTexture2D;
 enum class ERTMSDF_SDFFormat : uint8;
 struct FRTMSDFTextureSettingsCache;
 

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Richard Meredith AB. All Rights Reserved
 
 #include "RTMSDF_BitmapFactory.h"
+#include "Editor.h"
 #include "Generation/Bitmap/RTMSDF_BitmapGenerationAssetData.h"
 #include "Generation/Bitmap/RTMSDF_BitmapGenerationSettings.h"
 #include "Importer/Bitmap/RTMSDF_TexturePostProcess.h"
@@ -9,6 +10,7 @@
 #include "Settings/RTMSDF_ProjectSettings.h"
 #include "Curves/CurveLinearColorAtlas.h"
 #include "EditorFramework/AssetImportData.h"
+#include "HAL/FileManager.h"
 #include "Module/RTMSDFEditor.h"
 
 URTMSDF_BitmapFactory::URTMSDF_BitmapFactory()

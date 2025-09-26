@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
+#include "Kismet/BlueprintFunctionLibrary.h"
 #include "URTMSDF_EditorUtilityLibrary.generated.h"
 
 UCLASS()

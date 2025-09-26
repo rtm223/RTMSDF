@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
 #include "Vector2.hpp"
 
 namespace msdfgen {

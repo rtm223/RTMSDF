@@ -1,6 +1,7 @@
 // Copyright (c) Richard Meredith AB. All Rights Reserved
 
 #pragma once
+#include "IPropertyTypeCustomization.h"
 
 class FRTMSDF_SettingsStructCustomization : public IPropertyTypeCustomization
 {

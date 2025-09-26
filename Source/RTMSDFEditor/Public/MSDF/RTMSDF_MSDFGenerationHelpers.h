@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
 #include "Core/pixel-conversion.hpp"
 #include "core/Shape.h"	// Needed as we can't forward declare msdfgen::Shape::Bounds
 

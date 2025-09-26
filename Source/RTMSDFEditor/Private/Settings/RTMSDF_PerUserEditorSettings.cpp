@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Richard Meredith AB. All Rights Reserved
 
 #include "Settings/RTMSDF_PerUserEditorSettings.h"
+#include "UObject/SoftObjectPtr.h"
+#include "Materials/MaterialInterface.h"
 
 void URTMSDF_PerUserEditorSettings::PostInitProperties()
 {

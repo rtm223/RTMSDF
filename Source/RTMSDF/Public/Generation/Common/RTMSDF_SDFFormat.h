@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Richard Meredith AB. All Rights Reserved
 
 #pragma once
+#include "CoreMinimal.h"
 
 UENUM(BlueprintType, DisplayName = "SDF Format [RTMSDF]")
 enum class ERTMSDF_SDFFormat : uint8

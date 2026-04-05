@@ -19,3 +19,39 @@ Visualization functions for SDFs
 See [SDF Visualization Functions](./Visualizers.md)
 
 
+## SDF Display Functions
+
+Functions for creating basic masks for displaying SDFs, such as edge masks, strokes, glows, etc.
+
+
+
+See [SDF Display Functions](./Display.md)
+
+
+## SDF 2D Shape Functions
+
+Functions for creating procedural shapes from SDFs
+
+
+
+See [SDF 2D Shape Functions](./Shapes.md)
+
+
+## SDF Combination Functions
+
+Functions for combining multiple SDFs together, including various styles of Union, Intersection, and Difference, functions. These will work on SDFs from any source (be that from textures or procedural shapes) in any dimension
+
+
+
+See [SDF Combination Functions](./Combinations.md)
+
+
+## Color Blending Functions
+
+These functions are not strictly related to SDFs, but are useful when compositing various effects from the masks that are generated from SDFs
+
+
+
+See [Color Blending Functions](./ColorBlending.md)
+
+

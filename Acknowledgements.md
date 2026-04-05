@@ -5,10 +5,14 @@ This project is partially based upon or adapted from various other people's work
 > [Inigo Quilez](https://www.patreon.com/inigoquilez) on Patreon, https://iquilezles.org/
 
 The SDF visualizations I use (including those in the main banner images) are
-based upon the ones that Inigo regualrly uses on
-[Shadertoy](https://www.shadertoy.com/playlist/MXdSRf). I have adaped them
+based upon the ones that Inigo regularly uses on
+[Shadertoy](https://www.shadertoy.com/playlist/MXdSRf). I have adapted them
 to have some additional readability for the isolines, but the core largely 
 remains the same. It is a very good visualization, after all
+
+The shape material functions are almost entirely based upon 
+[Inigo's 2D SDF](https://iquilezles.org/articles/distfunctions2d/) shape functions
+with a few _very_ minor adaptions to work better with Unreal's Material Graph
 
 ### **License:** MIT
 ```

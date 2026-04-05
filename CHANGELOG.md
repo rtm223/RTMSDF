@@ -4,17 +4,30 @@ Version numbering as [**Major** . **Minor** . **Patch**]
 - **Minor** : Additional features and changes that should not break compatibility outside of minor deprecations
 - **Patch** : Bug fixes, minor edits that do not change behaviour
 
+## Unreleased Changes
+> NOTE: The following changes are live in this branch, but have not been rolled into any release yet
+
+[No Changes]
+
+## [1.2.0] Material Update
+
+### Changed
+- Examples folder can be safely removed from the plugin to reduce clutter (all dependencies removed)
+
+### Added
+- Basic Materials for surface and decal domains, intended for in-world icons and to demonstrate that world space can use simple thresholding
+- Material Functions for various SDF manipulation
+  - [Display Functions](./Docs/MaterialFunctions/Display.md) - edge masks, strokes, glows, UV & widget scaling
+  - [Combination Functions](./Docs/MaterialFunctions/Combinations.md) - unions, intersections, engraves, extrusions
+  - [2D Shape Functions](./Docs/MaterialFunctions/Shapes.md) - a variety of procedural SDF shapes
+  - [Color Blending Functions](./Docs/MaterialFunctions/ColorBlending.md) - some handy color mixing functions that assist in applying strokes and glows etc. without producing artifacts
+
+
 ## [1.1.1] UE5.7 Preview Support
 Released 2025-09-26
 
 Note: only 5.7 builds have been created for this patch version
 Previous UE versions should use 1.1.0
-
-## Unreleased Changes
-> NOTE: The following changes are live in this branch, but have not been rolled into any release yet
-
-### Added
-- Basic Materials for surface and decal domains, intended for in-world icons and to demonstrate that world space can use simple thresholding
 
 ## [1.1.0] Improved Examples and Material Toolkit
 Released 2025-09-19

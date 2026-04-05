@@ -6,7 +6,7 @@ source files and all Unreal-supported texture source files (.psd, .png, .tif etc
 Uses [MSDFGen](https://github.com/Chlumsky/msdfgen) for processing of SVG files. 
 Currently supports UE5.4+
 
-See [Changelog](CHANGELOG.md) for details of what is new in version 1.0.
+See [Changelog](CHANGELOG.md) for details of what is new in version 1.2.
 
 ## Downloading from GitHub
 You can either clone this repository if you're comfortable with git and building Unreal

@@ -1,9 +1,11 @@
 # SDF Examples
 
-The plugin contains various examples of how to work with SDF textures, which you can find in the Content Browser under `All/Plugins/Signed Distance Fields [RTMSDF] Content/Examples/`. If you cannot see this directory check the content browser settings that `Show Plugin Content` is checked. There are also a small selection of SDF textures, used in these examples
+The plugin contains various examples of how to work with SDF textures, which you can find in the Content Browser under `All/Plugins/Signed Distance Fields [RTMSDF] Content/Examples/`. If you cannot see this directory check the content browser settings that `Show Plugin Content` is checked. There are also a small selection of SDF textures, used in these examples.
+
+It is possible to remove / exclude the `Examples` directory from your projects, if you would rather not have these assets cluttering things up. None of the other content will ever depend on assets in this folder.
 
 ## The Example Browser
-The examples are now presented as an interactive pop-up window, which you can activate by finding the widget called `RUN_ME` in the examples foleder.
+The examples are now presented as an interactive pop-up window, which you can activate by finding the widget called `RUN_ME` in the examples folder.
 
 ![](Images/Examples_ContentBrowser.png)
 

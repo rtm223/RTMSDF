@@ -23,8 +23,8 @@ Released 2026-04-06
   - [2D Shape Functions](./Docs/MaterialFunctions/Shapes.md) - a variety of procedural SDF shapes
   - [Color Blending Functions](./Docs/MaterialFunctions/ColorBlending.md) - some handy color mixing functions that assist in applying strokes and glows etc. without producing artifacts
 - Updated basic example materials with callouts to the new Material Functions
-- Added a Widget Scaling example (vertex shader to expand a widget beyond its geometry to show a wide glow)
-- Added a Color Blending example (how to fix artifacts when blending between features with different alphas)
+- Widget Scaling example (vertex shader to expand a widget beyond its geometry to show a wide glow)
+- Color Blending example (how to fix artifacts when blending between features with different alphas)
 
 
 ## [1.1.1] UE5.7 Preview Support

@@ -1,10 +1,16 @@
 ![RTMSDF - 2D Signed Distance Field Generators & Importers for Unreal Engine 5](Docs/Images/RTMSDF_Banner_830x300.png)
 
 # RTMSDF
+> Currently supports UE5.4+
+
 An Unreal Engine 5 Plugin that provides importers for generating 2D SDFs from .svg 
 source files and all Unreal-supported texture source files (.psd, .png, .tif etc). 
 Uses [MSDFGen](https://github.com/Chlumsky/msdfgen) for processing of SVG files. 
-Currently supports UE5.4+
+
+As of Version 1.2 there is now a library of over 80  Material Functions for 
+[displaying SDFs](Docs/MaterialFunctions/Display.md) (outlines, glows, etc.),
+[creating procedural SDF shapes](Docs/MaterialFunctions/Shapes.md), and various
+other helpers for working with SDFs in materials.
 
 See [Changelog](CHANGELOG.md) for details of what is new in version 1.2.
 
@@ -57,5 +63,6 @@ Start by trying to import one of the example assets
 
 ## Further Reading
 Check out the [Docs](Docs/Index.md) for more info. Recommended next steps are
-  - [Generation](Docs/Generation/Index.md) - to find out more about generating SDFs and import options
+  - [Generation](Docs/Generation/Index.md) to find out more about generating SDFs and import options
   - [Examples](Docs/Examples/Index.md) to see some of the effects you can create with SDF textures
+  - [Material Function API](Docs/MaterialFunctions/Index.md) to see the suite of material functions

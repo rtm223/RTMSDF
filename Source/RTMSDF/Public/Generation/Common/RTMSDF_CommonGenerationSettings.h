@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Generation/Common/RTMSDF_SDFFormat.h"
 #include "RTMSDF_CommonGenerationSettings.generated.h"
 
 enum class ERTMSDF_SDFFormat : uint8;

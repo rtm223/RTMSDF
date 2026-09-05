@@ -7,7 +7,15 @@ Version numbering as [**Major** . **Minor** . **Patch**]
 ## Unreleased Changes
 > NOTE: The following changes are live in this branch, but have not been rolled into any release yet
 
-[No Changes]
+## [1.3.0] 5.8 Update
+Released 2026-06-26
+
+### Changed
+- Support for Unreal Engine 5.8
+
+### Added
+- Material Functions for building irregular polygons with any number of sides
+- Examples for using the irregular polygon functions
 
 ## [1.2.0] Material Function Update
 Released 2026-04-06

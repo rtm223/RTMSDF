@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
 	"Version": 1,
-	"VersionName": "1.2.0",
+	"VersionName": "1.3.0",
 	"EnabledByDefault": false,
 	"FriendlyName": "Signed Distance Fields [RTMSDF]",
 	"EditorCustomVirtualPath": "RTM",

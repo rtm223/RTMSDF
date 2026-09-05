@@ -15,6 +15,7 @@ Released 2026-06-26
 
 ### Added
 - Material Functions for building irregular polygons with any number of sides
+- Examples for using the irregular polygon functions
 
 ## [1.2.0] Material Function Update
 Released 2026-04-06
